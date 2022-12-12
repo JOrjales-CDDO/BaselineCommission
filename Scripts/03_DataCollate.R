@@ -216,6 +216,7 @@ svc_sheets_cntxtssPP <- cbind(
     svc_sheets_cntxt %>% 
         select(ServiceID
         , Service
+        , URLService
         , URLGovUK
         )
     , svc_sheets_ssPP

@@ -89,13 +89,13 @@ svc_sheets_cddo <- data.frame(
     , `UsersVeryDissatisfied_AddInfo` = character()
     , `UsersVeryDissatisfied_FreeText` = character()
 
-    , `UsersRespondents` = numeric()
-    , `UsersRespondents_AddInfo` = character()
-    , `UsersRespondents_FreeText` = character()
+    , `UsersTotalSatisfactionRespondents` = numeric()
+    , `UsersTotalSatisfactionRespondents_AddInfo` = character()
+    , `UsersTotalSatisfactionRespondents_FreeText` = character()
 
-    , `UsersJourneyTime` = character() # This could be problematic as not consistent minutes/hours/days
-    , `UsersJourneyTime_AddInfo` = character()
-    , `UsersJourneyTime_FreeText` = character()
+    , `UsersJourneyTimeHours` = character() # This could be problematic as not consistent minutes/hours/days
+    , `UsersJourneyTimeHours_AddInfo` = character()
+    , `UsersJourneyTimeHours_FreeText` = character()
 
     , `AutomatedTransactions` = character() # Character since percentage range factor
     , `AutomatedTransactions_AddInfo` = character()
