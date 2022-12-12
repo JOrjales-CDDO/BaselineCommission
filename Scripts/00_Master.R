@@ -44,6 +44,9 @@ gs4_auth(token = drive_token())
 # Store text for naming conventions later
 snapshot = "December 2022"
 
+# Set Working Directory (create a folder called Repos/BaselineCommission)
+setwd("~/Repos/BaselineCommission")
+
 # Google Drive storage folder for returns
 URL <- "https://drive.google.com/drive/folders/1U6LZnpjxSw16oPXf8BRjKmF_NjC-nm68"
 

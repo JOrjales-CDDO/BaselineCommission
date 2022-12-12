@@ -14,6 +14,8 @@ gs4_create(name = paste0(snapshot, " - ServiceBaselines_"
         , "CDDO_PainPts"
         , "ServiceSpecKPIs"
         , "ServiceSpecPainPts"
+        , "OpportunityAnalysis"
+        , "CDDO_CalcKPIs"
         )
 )
 
@@ -27,7 +29,7 @@ folder_id <- drive_find(n_max = 10
 # if have more than one folder called 99_Testing, will find all of them.
 
 #### Send tables to placeholder sheet(s)--------------------------------
-sheet_write(data = svc_sheets_overall
+sheet_write(data = svc_sheets_overall_final
     , ss = sheet_id
     , sheet = "AllData")
 
@@ -50,6 +52,14 @@ sheet_write(data = svc_sheets_cntxtservspec
 sheet_write(data = svc_sheets_cntxtssPP
     , ss = sheet_id
     , sheet = "ServiceSpecPainPts")
+
+sheet_write(data = bespoke_OppA
+    , ss = sheet_id
+    , sheet = "OpportunityAnalysis")
+
+sheet_write(data = bespoke_CDDOKPI
+    , ss = sheet_id
+    , sheet = "CDDO_CalcKPIs")
 
 
 #### Move the sheet to the final output folder area---------------------

@@ -13,7 +13,8 @@ sheets_list <- drive_ls(path = URL, type = c("spreadsheet"))
 
 # Service Contextual Info
 svc_sheets_cntxt <- data.frame(
-    `SourceFile` = character()
+    `ServiceID` = character()
+    , `SourceFile` = character()
     , `FileLink` = character()
     , `Service` = character()
     , `ServiceOwner` = character()
@@ -169,14 +170,14 @@ svc_sheets_cddo <- data.frame(
  svc_sheets_PP <- data.frame(
     `CSupport_TeamExists` = character()
     , `CSupport_StatusExists` = character()
-    , `CSupport_ContactCount` = numeric()
+    , `CSupport_ContactCount` = character()
     , `CSupport_ImprovementsText` = character()
     , `CSupport_ChallengesText` = character()
 
     , `PaperUse_LettersSendExist` = character()
-    , `PaperUse_LettersSendCount` = numeric()
+    , `PaperUse_LettersSendCount` = character()
     , `PaperUse_LettersReceiveExist` = character()
-    , `PaperUse_LettersReceiveCount` = numeric()
+    , `PaperUse_LettersReceiveCount` = character()
     , `PaperUse_SignatureExist` = character()
     , `PaperUse_SignaturePercent` = character()
     , `PaperUse_ImprovementsText` = character()
@@ -199,17 +200,22 @@ svc_sheets_cddo <- data.frame(
 
     , `Additional_IDCheckExists` = character()
     , `Additional_TaxDisburse` = character()
-    , `Additional_FundingAward` = numeric()
-
-    , `Usability_Skills` = character()
-    , `Usability_SkillsImprovementsText` = character()
-    , `Usability_SkillsChallengesText` = character()
+    , `Additional_FundingAward` = character()
 
     , `Usability_Compliant` = character()
     , `Usability_CompliantImprovementsText` = character()
+    , `Usability_CompliantChallengesText` = character()
 
-    , `Usability_Burden` = character()
-    , `Usability_BurdenImprovementsText` = character()
+    ## These were incorrectly omitted from the template sent out in December.
+    ## Likely need to be put back in for the next one and relevant row/col refs
+    ## repointed.
+    #, `Usability_Skills` = character()
+    #, `Usability_SkillsImprovementsText` = character()
+    #, `Usability_SkillsChallengesText` = character()
+
+    #, `Usability_Burden` = character()
+    #, `Usability_BurdenImprovementsText` = character()
+    #, `Usability_CompliantChallengesText` = character()
 
     , `Usability_Complex` = character()
     , `Usability_ComplexImprovementsText` = character()
@@ -271,21 +277,24 @@ for (i in 1:length(sheets_list$name)){
 sheets_cntxt <- read_sheet(sheets_list$id[i]
         , sheet = 1
         , range = "C4:D10"
-        #, col_names = "Value"
+        , col_names = c("Guidance", "Value")
     )
 
-sheets_cntxt2 <- rbind(sheets_list$name[i]
-    , paste0("https://docs.google.com/spreadsheets/d/1", sheets_list$id[i])
+sheets_cntxt2 <- rbind(
+    str_extract(sheets_list$name[i][[1]],"(?<=-).+(?=-)")
+    , sheets_list$name[i]
+    , paste0("https://docs.google.com/spreadsheets/d/", sheets_list$id[i])
     , sheets_cntxt
 )
 
 # Populate table
 for (j in 1:length(svc_sheets_cntxt)){
-    svc_sheets_cntxt[i,j] = sheets_cntxt2[[2]][j]
+    svc_sheets_cntxt[i,j] = ifelse(is.null(sheets_cntxt2[[2]][j][[1]]) == TRUE
+    , NA, sheets_cntxt2[[2]][j][[1]])
 }
 
 # To figure out what service we're dealing with in loop if it breaks!
-print(paste0("Loop on service: ", svc_sheets_cntxt[i,3]))
+print(paste0("Loop on service: ", svc_sheets_cntxt[i,4]))
 print("-----------------------")
 
 ## Pull out Service Scope & Objectives (if no data present in table AT ALL, 
@@ -293,12 +302,13 @@ print("-----------------------")
 sheets_objctvs <- read_sheet(sheets_list$id[i]
         , sheet = 2
         , range = "C6:D9"
-        #, col_names = "Value"
+        , col_names = c("Guidance", "Value")
     )
 
 # Populate table
 for (j in 1:length(svc_sheets_objctvs)){
-    svc_sheets_objctvs[i,j] = sheets_objctvs[[2]][j]
+    svc_sheets_objctvs[i,j] = ifelse(is.null(sheets_objctvs[[2]][j][[1]]) == TRUE
+    , NA, sheets_objctvs[[2]][j][[1]])
 }
 
 ## Pull out Performance Metrics 1 (if no data present in table AT ALL, 
@@ -310,280 +320,286 @@ sheets_PMs1 <- read_sheet(sheets_list$id[i]
     )
 
 # FTE Count
-svc_sheets_cddo[i,1] = sheets_PMs1[[2]][1]
-svc_sheets_cddo[i,2] = sheets_PMs1[[3]][1]
-svc_sheets_cddo[i,3] = sheets_PMs1[[4]][1]
+svc_sheets_cddo[i,1] = ifelse(is.null(sheets_PMs1[[2]][1][[1]]) == TRUE, NA, sheets_PMs1[[2]][1][[1]])
+svc_sheets_cddo[i,2] = ifelse(is.null(sheets_PMs1[[3]][1][[1]]) == TRUE, NA, sheets_PMs1[[3]][1][[1]])
+svc_sheets_cddo[i,3] = ifelse(is.null(sheets_PMs1[[4]][1][[1]]) == TRUE, NA, sheets_PMs1[[4]][1][[1]])
 
 # NonStaff Cost
-svc_sheets_cddo[i,4] = sheets_PMs1[[2]][2]
-svc_sheets_cddo[i,5] = sheets_PMs1[[3]][2]
-svc_sheets_cddo[i,6] = sheets_PMs1[[4]][2]
+svc_sheets_cddo[i,4] = ifelse(is.null(sheets_PMs1[[2]][2][[1]]) == TRUE, NA, sheets_PMs1[[2]][2][[1]])
+svc_sheets_cddo[i,5] = ifelse(is.null(sheets_PMs1[[3]][2][[1]]) == TRUE, NA, sheets_PMs1[[3]][2][[1]])
+svc_sheets_cddo[i,6] = ifelse(is.null(sheets_PMs1[[4]][2][[1]]) == TRUE, NA, sheets_PMs1[[4]][2][[1]])
 
 # Completed Transactions
-svc_sheets_cddo[i,7] = sheets_PMs1[[2]][3]
-svc_sheets_cddo[i,8] = sheets_PMs1[[3]][3]
-svc_sheets_cddo[i,9] = sheets_PMs1[[4]][3]
+svc_sheets_cddo[i,7] = ifelse(is.null(sheets_PMs1[[2]][3][[1]]) == TRUE, NA, sheets_PMs1[[2]][3][[1]])
+svc_sheets_cddo[i,8] = ifelse(is.null(sheets_PMs1[[3]][3][[1]]) == TRUE, NA, sheets_PMs1[[3]][3][[1]])
+svc_sheets_cddo[i,9] = ifelse(is.null(sheets_PMs1[[4]][3][[1]]) == TRUE, NA, sheets_PMs1[[4]][3][[1]])
 
 # Completed Digital
-svc_sheets_cddo[i,10] = sheets_PMs1[[2]][4]
-svc_sheets_cddo[i,11] = sheets_PMs1[[3]][4]
-svc_sheets_cddo[i,12] = sheets_PMs1[[4]][4]
+svc_sheets_cddo[i,10] = ifelse(is.null(sheets_PMs1[[2]][4][[1]]) == TRUE, NA, sheets_PMs1[[2]][4][[1]])
+svc_sheets_cddo[i,11] = ifelse(is.null(sheets_PMs1[[3]][4][[1]]) == TRUE, NA, sheets_PMs1[[3]][4][[1]])
+svc_sheets_cddo[i,12] = ifelse(is.null(sheets_PMs1[[4]][4][[1]]) == TRUE, NA, sheets_PMs1[[4]][4][[1]])
 
 # Started Digital
-svc_sheets_cddo[i,13] = sheets_PMs1[[2]][5]
-svc_sheets_cddo[i,14] = sheets_PMs1[[3]][5]
-svc_sheets_cddo[i,15] = sheets_PMs1[[4]][5]
+svc_sheets_cddo[i,13] = ifelse(is.null(sheets_PMs1[[2]][5][[1]]) == TRUE, NA, sheets_PMs1[[2]][5][[1]])
+svc_sheets_cddo[i,14] = ifelse(is.null(sheets_PMs1[[3]][5][[1]]) == TRUE, NA, sheets_PMs1[[3]][5][[1]])
+svc_sheets_cddo[i,15] = ifelse(is.null(sheets_PMs1[[4]][5][[1]]) == TRUE, NA, sheets_PMs1[[4]][5][[1]])
 
 # Complaints
-svc_sheets_cddo[i,16] = sheets_PMs1[[2]][6]
-svc_sheets_cddo[i,17] = sheets_PMs1[[3]][6]
-svc_sheets_cddo[i,18] = sheets_PMs1[[4]][6]
+svc_sheets_cddo[i,16] = ifelse(is.null(sheets_PMs1[[2]][6][[1]]) == TRUE, NA, sheets_PMs1[[2]][6][[1]])
+svc_sheets_cddo[i,17] = ifelse(is.null(sheets_PMs1[[3]][6][[1]]) == TRUE, NA, sheets_PMs1[[3]][6][[1]])
+svc_sheets_cddo[i,18] = ifelse(is.null(sheets_PMs1[[4]][6][[1]]) == TRUE, NA, sheets_PMs1[[4]][6][[1]])
 
 # Users - Emails
-svc_sheets_cddo[i,19] = sheets_PMs1[[2]][7]
-svc_sheets_cddo[i,20] = sheets_PMs1[[3]][7]
-svc_sheets_cddo[i,21] = sheets_PMs1[[4]][7]
+svc_sheets_cddo[i,19] = ifelse(is.null(sheets_PMs1[[2]][7][[1]]) == TRUE, NA, sheets_PMs1[[2]][7][[1]])
+svc_sheets_cddo[i,20] = ifelse(is.null(sheets_PMs1[[3]][7][[1]]) == TRUE, NA, sheets_PMs1[[3]][7][[1]])
+svc_sheets_cddo[i,21] = ifelse(is.null(sheets_PMs1[[4]][7][[1]]) == TRUE, NA, sheets_PMs1[[4]][7][[1]])
 
 # Users - Phone
-svc_sheets_cddo[i,22] = sheets_PMs1[[2]][8]
-svc_sheets_cddo[i,23] = sheets_PMs1[[3]][8]
-svc_sheets_cddo[i,24] = sheets_PMs1[[4]][8]
+svc_sheets_cddo[i,22] = ifelse(is.null(sheets_PMs1[[2]][8][[1]]) == TRUE, NA, sheets_PMs1[[2]][8][[1]])
+svc_sheets_cddo[i,23] = ifelse(is.null(sheets_PMs1[[3]][8][[1]]) == TRUE, NA, sheets_PMs1[[3]][8][[1]])
+svc_sheets_cddo[i,24] = ifelse(is.null(sheets_PMs1[[4]][8][[1]]) == TRUE, NA, sheets_PMs1[[4]][8][[1]])
 
 # Users - letters
-svc_sheets_cddo[i,25] = sheets_PMs1[[2]][9]
-svc_sheets_cddo[i,26] = sheets_PMs1[[3]][9]
-svc_sheets_cddo[i,27] = sheets_PMs1[[4]][9]
+svc_sheets_cddo[i,25] = ifelse(is.null(sheets_PMs1[[2]][9][[1]]) == TRUE, NA, sheets_PMs1[[2]][9][[1]])
+svc_sheets_cddo[i,26] = ifelse(is.null(sheets_PMs1[[3]][9][[1]]) == TRUE, NA, sheets_PMs1[[3]][9][[1]])
+svc_sheets_cddo[i,27] = ifelse(is.null(sheets_PMs1[[4]][9][[1]]) == TRUE, NA, sheets_PMs1[[4]][9][[1]])
 
 # Users - V. Satisfied
-svc_sheets_cddo[i,28] = sheets_PMs1[[2]][10]
-svc_sheets_cddo[i,29] = sheets_PMs1[[3]][10]
-svc_sheets_cddo[i,30] = sheets_PMs1[[4]][10]
+svc_sheets_cddo[i,28] = ifelse(is.null(sheets_PMs1[[2]][10][[1]]) == TRUE, NA, sheets_PMs1[[2]][10][[1]])
+svc_sheets_cddo[i,29] = ifelse(is.null(sheets_PMs1[[3]][10][[1]]) == TRUE, NA, sheets_PMs1[[3]][10][[1]])
+svc_sheets_cddo[i,30] = ifelse(is.null(sheets_PMs1[[4]][10][[1]]) == TRUE, NA, sheets_PMs1[[4]][10][[1]])
 
 # Users - Satisfied
-svc_sheets_cddo[i,31] = sheets_PMs1[[2]][11]
-svc_sheets_cddo[i,32] = sheets_PMs1[[3]][11]
-svc_sheets_cddo[i,33] = sheets_PMs1[[4]][11]
+svc_sheets_cddo[i,31] = ifelse(is.null(sheets_PMs1[[2]][11][[1]]) == TRUE, NA, sheets_PMs1[[2]][11][[1]])
+svc_sheets_cddo[i,32] = ifelse(is.null(sheets_PMs1[[3]][11][[1]]) == TRUE, NA, sheets_PMs1[[3]][11][[1]])
+svc_sheets_cddo[i,33] = ifelse(is.null(sheets_PMs1[[4]][11][[1]]) == TRUE, NA, sheets_PMs1[[4]][11][[1]])
 
 # Users - Dissatisfied
-svc_sheets_cddo[i,34] = sheets_PMs1[[2]][12]
-svc_sheets_cddo[i,35] = sheets_PMs1[[3]][12]
-svc_sheets_cddo[i,36] = sheets_PMs1[[4]][12]
+svc_sheets_cddo[i,34] = ifelse(is.null(sheets_PMs1[[2]][12][[1]]) == TRUE, NA, sheets_PMs1[[2]][12][[1]])
+svc_sheets_cddo[i,35] = ifelse(is.null(sheets_PMs1[[3]][12][[1]]) == TRUE, NA, sheets_PMs1[[3]][12][[1]])
+svc_sheets_cddo[i,36] = ifelse(is.null(sheets_PMs1[[4]][12][[1]]) == TRUE, NA, sheets_PMs1[[4]][12][[1]])
 
 # Users - V. Dissatisfied
-svc_sheets_cddo[i,37] = sheets_PMs1[[2]][13]
-svc_sheets_cddo[i,38] = sheets_PMs1[[3]][13]
-svc_sheets_cddo[i,39] = sheets_PMs1[[4]][13]
+svc_sheets_cddo[i,37] = ifelse(is.null(sheets_PMs1[[2]][13][[1]]) == TRUE, NA, sheets_PMs1[[2]][13][[1]])
+svc_sheets_cddo[i,38] = ifelse(is.null(sheets_PMs1[[3]][13][[1]]) == TRUE, NA, sheets_PMs1[[3]][13][[1]])
+svc_sheets_cddo[i,39] = ifelse(is.null(sheets_PMs1[[4]][13][[1]]) == TRUE, NA, sheets_PMs1[[4]][13][[1]])
 
 # Users - Respondents
-svc_sheets_cddo[i,40] = sheets_PMs1[[2]][14]
-svc_sheets_cddo[i,41] = sheets_PMs1[[3]][14]
-svc_sheets_cddo[i,42] = sheets_PMs1[[4]][14]
+svc_sheets_cddo[i,40] = ifelse(is.null(sheets_PMs1[[2]][14][[1]]) == TRUE, NA, sheets_PMs1[[2]][14][[1]])
+svc_sheets_cddo[i,41] = ifelse(is.null(sheets_PMs1[[3]][14][[1]]) == TRUE, NA, sheets_PMs1[[3]][14][[1]])
+svc_sheets_cddo[i,42] = ifelse(is.null(sheets_PMs1[[4]][14][[1]]) == TRUE, NA, sheets_PMs1[[4]][14][[1]])
 
 # Users - Journey Time
-svc_sheets_cddo[i,43] = sheets_PMs1[[2]][15]
-svc_sheets_cddo[i,44] = sheets_PMs1[[3]][15]
-svc_sheets_cddo[i,45] = sheets_PMs1[[4]][15]
+svc_sheets_cddo[i,43] = ifelse(is.null(sheets_PMs1[[2]][15][[1]]) == TRUE, NA, sheets_PMs1[[2]][15][[1]])
+svc_sheets_cddo[i,44] = ifelse(is.null(sheets_PMs1[[3]][15][[1]]) == TRUE, NA, sheets_PMs1[[3]][15][[1]])
+svc_sheets_cddo[i,45] = ifelse(is.null(sheets_PMs1[[4]][15][[1]]) == TRUE, NA, sheets_PMs1[[4]][15][[1]])
 
 # Automated Transactions
-svc_sheets_cddo[i,46] = sheets_PMs1[[2]][16]
-svc_sheets_cddo[i,47] = sheets_PMs1[[3]][16]
-svc_sheets_cddo[i,48] = sheets_PMs1[[4]][16]
+svc_sheets_cddo[i,46] = ifelse(is.null(sheets_PMs1[[2]][16][[1]]) == TRUE, NA, sheets_PMs1[[2]][16][[1]])
+svc_sheets_cddo[i,47] = ifelse(is.null(sheets_PMs1[[3]][16][[1]]) == TRUE, NA, sheets_PMs1[[3]][16][[1]])
+svc_sheets_cddo[i,48] = ifelse(is.null(sheets_PMs1[[4]][16][[1]]) == TRUE, NA, sheets_PMs1[[4]][16][[1]])
 
 
 ## Pull out Performance Metrics for specific services (if no data present in table AT ALL, 
 # will say names must be same attribute as vector)
 sheets_PMs2 <- read_sheet(sheets_list$id[i]
         , sheet = 3
-        , range = "B27:F36"
+        , range = "A27:F36"
         , col_names = FALSE
     )
 
 # KPI1
-svc_sheets_servspec[i,1] = sheets_PMs2[[1]][1]
-svc_sheets_servspec[i,2] = sheets_PMs2[[2]][1]
-svc_sheets_servspec[i,3] = sheets_PMs2[[3]][1]
-svc_sheets_servspec[i,4] = sheets_PMs2[[4]][1]
-svc_sheets_servspec[i,5] = sheets_PMs2[[5]][1]
+svc_sheets_servspec[i,1] = ifelse(is.null(sheets_PMs2[[2]][1][[1]]) == TRUE, NA, sheets_PMs2[[2]][1][[1]])
+svc_sheets_servspec[i,2] = ifelse(is.null(sheets_PMs2[[3]][1][[1]]) == TRUE, NA, sheets_PMs2[[3]][1][[1]])
+svc_sheets_servspec[i,3] = ifelse(is.null(sheets_PMs2[[4]][1][[1]]) == TRUE, NA, sheets_PMs2[[4]][1][[1]])
+svc_sheets_servspec[i,4] = ifelse(is.null(sheets_PMs2[[5]][1][[1]]) == TRUE, NA, sheets_PMs2[[5]][1][[1]])
+svc_sheets_servspec[i,5] = ifelse(is.null(sheets_PMs2[[6]][1][[1]]) == TRUE, NA, sheets_PMs2[[6]][1][[1]])
 
 # KPI2
-svc_sheets_servspec[i,6] = sheets_PMs2[[1]][2]
-svc_sheets_servspec[i,7] = sheets_PMs2[[2]][2]
-svc_sheets_servspec[i,8] = sheets_PMs2[[3]][2]
-svc_sheets_servspec[i,9] = sheets_PMs2[[4]][2]
-svc_sheets_servspec[i,10] = sheets_PMs2[[5]][2]
+svc_sheets_servspec[i,6] = ifelse(is.null(sheets_PMs2[[2]][2][[1]]) == TRUE, NA, sheets_PMs2[[2]][2][[1]])
+svc_sheets_servspec[i,7] = ifelse(is.null(sheets_PMs2[[3]][2][[1]]) == TRUE, NA, sheets_PMs2[[3]][2][[1]])
+svc_sheets_servspec[i,8] = ifelse(is.null(sheets_PMs2[[4]][2][[1]]) == TRUE, NA, sheets_PMs2[[4]][2][[1]])
+svc_sheets_servspec[i,9] = ifelse(is.null(sheets_PMs2[[5]][2][[1]]) == TRUE, NA, sheets_PMs2[[5]][2][[1]])
+svc_sheets_servspec[i,10] = ifelse(is.null(sheets_PMs2[[6]][2][[1]]) == TRUE, NA, sheets_PMs2[[6]][2][[1]])
 
 # KPI3
-svc_sheets_servspec[i,11] = sheets_PMs2[[1]][3]
-svc_sheets_servspec[i,12] = sheets_PMs2[[2]][3]
-svc_sheets_servspec[i,13] = sheets_PMs2[[3]][3]
-svc_sheets_servspec[i,14] = sheets_PMs2[[4]][3]
-svc_sheets_servspec[i,15] = sheets_PMs2[[5]][3]
+svc_sheets_servspec[i,11] = ifelse(is.null(sheets_PMs2[[2]][3][[1]]) == TRUE, NA, sheets_PMs2[[2]][3][[1]])
+svc_sheets_servspec[i,12] = ifelse(is.null(sheets_PMs2[[3]][3][[1]]) == TRUE, NA, sheets_PMs2[[3]][3][[1]])
+svc_sheets_servspec[i,13] = ifelse(is.null(sheets_PMs2[[4]][3][[1]]) == TRUE, NA, sheets_PMs2[[4]][3][[1]])
+svc_sheets_servspec[i,14] = ifelse(is.null(sheets_PMs2[[5]][3][[1]]) == TRUE, NA, sheets_PMs2[[5]][3][[1]])
+svc_sheets_servspec[i,15] = ifelse(is.null(sheets_PMs2[[6]][3][[1]]) == TRUE, NA, sheets_PMs2[[6]][3][[1]])
 
 # KPI4
-svc_sheets_servspec[i,16] = sheets_PMs2[[1]][4]
-svc_sheets_servspec[i,17] = sheets_PMs2[[2]][4]
-svc_sheets_servspec[i,18] = sheets_PMs2[[3]][4]
-svc_sheets_servspec[i,19] = sheets_PMs2[[4]][4]
-svc_sheets_servspec[i,20] = sheets_PMs2[[5]][4]
+svc_sheets_servspec[i,16] = ifelse(is.null(sheets_PMs2[[2]][4][[1]]) == TRUE, NA, sheets_PMs2[[2]][4][[1]])
+svc_sheets_servspec[i,17] = ifelse(is.null(sheets_PMs2[[3]][4][[1]]) == TRUE, NA, sheets_PMs2[[3]][4][[1]])
+svc_sheets_servspec[i,18] = ifelse(is.null(sheets_PMs2[[4]][4][[1]]) == TRUE, NA, sheets_PMs2[[4]][4][[1]])
+svc_sheets_servspec[i,19] = ifelse(is.null(sheets_PMs2[[5]][4][[1]]) == TRUE, NA, sheets_PMs2[[5]][4][[1]])
+svc_sheets_servspec[i,20] = ifelse(is.null(sheets_PMs2[[6]][4][[1]]) == TRUE, NA, sheets_PMs2[[6]][4][[1]])
 
 # KPI5
-svc_sheets_servspec[i,21] = sheets_PMs2[[1]][5]
-svc_sheets_servspec[i,22] = sheets_PMs2[[2]][5]
-svc_sheets_servspec[i,23] = sheets_PMs2[[3]][5]
-svc_sheets_servspec[i,14] = sheets_PMs2[[4]][5]
-svc_sheets_servspec[i,25] = sheets_PMs2[[5]][5]
+svc_sheets_servspec[i,21] = ifelse(is.null(sheets_PMs2[[2]][5][[1]]) == TRUE, NA, sheets_PMs2[[2]][5][[1]])
+svc_sheets_servspec[i,22] = ifelse(is.null(sheets_PMs2[[3]][5][[1]]) == TRUE, NA, sheets_PMs2[[3]][5][[1]])
+svc_sheets_servspec[i,23] = ifelse(is.null(sheets_PMs2[[4]][5][[1]]) == TRUE, NA, sheets_PMs2[[4]][5][[1]])
+svc_sheets_servspec[i,24] = ifelse(is.null(sheets_PMs2[[5]][5][[1]]) == TRUE, NA, sheets_PMs2[[5]][5][[1]])
+svc_sheets_servspec[i,25] = ifelse(is.null(sheets_PMs2[[6]][5][[1]]) == TRUE, NA, sheets_PMs2[[6]][5][[1]])
 
 # KPI6
-svc_sheets_servspec[i,26] = sheets_PMs2[[1]][6]
-svc_sheets_servspec[i,27] = sheets_PMs2[[2]][6]
-svc_sheets_servspec[i,28] = sheets_PMs2[[3]][6]
-svc_sheets_servspec[i,29] = sheets_PMs2[[4]][6]
-svc_sheets_servspec[i,30] = sheets_PMs2[[5]][6]
+svc_sheets_servspec[i,26] = ifelse(is.null(sheets_PMs2[[2]][6][[1]]) == TRUE, NA, sheets_PMs2[[2]][6][[1]])
+svc_sheets_servspec[i,27] = ifelse(is.null(sheets_PMs2[[3]][6][[1]]) == TRUE, NA, sheets_PMs2[[3]][6][[1]])
+svc_sheets_servspec[i,28] = ifelse(is.null(sheets_PMs2[[4]][6][[1]]) == TRUE, NA, sheets_PMs2[[4]][6][[1]])
+svc_sheets_servspec[i,29] = ifelse(is.null(sheets_PMs2[[5]][6][[1]]) == TRUE, NA, sheets_PMs2[[5]][6][[1]])
+svc_sheets_servspec[i,30] = ifelse(is.null(sheets_PMs2[[6]][6][[1]]) == TRUE, NA, sheets_PMs2[[6]][6][[1]])
 
 # KPI7
-svc_sheets_servspec[i,31] = sheets_PMs2[[1]][7]
-svc_sheets_servspec[i,32] = sheets_PMs2[[2]][7]
-svc_sheets_servspec[i,33] = sheets_PMs2[[3]][7]
-svc_sheets_servspec[i,34] = sheets_PMs2[[4]][7]
-svc_sheets_servspec[i,35] = sheets_PMs2[[5]][7]
+svc_sheets_servspec[i,31] = ifelse(is.null(sheets_PMs2[[2]][7][[1]]) == TRUE, NA, sheets_PMs2[[2]][7][[1]])
+svc_sheets_servspec[i,32] = ifelse(is.null(sheets_PMs2[[3]][7][[1]]) == TRUE, NA, sheets_PMs2[[3]][7][[1]])
+svc_sheets_servspec[i,33] = ifelse(is.null(sheets_PMs2[[4]][7][[1]]) == TRUE, NA, sheets_PMs2[[4]][7][[1]])
+svc_sheets_servspec[i,34] = ifelse(is.null(sheets_PMs2[[5]][7][[1]]) == TRUE, NA, sheets_PMs2[[5]][7][[1]])
+svc_sheets_servspec[i,35] = ifelse(is.null(sheets_PMs2[[6]][7][[1]]) == TRUE, NA, sheets_PMs2[[6]][7][[1]])
 
 # KPI8
-svc_sheets_servspec[i,36] = sheets_PMs2[[1]][8]
-svc_sheets_servspec[i,37] = sheets_PMs2[[2]][8]
-svc_sheets_servspec[i,38] = sheets_PMs2[[3]][8]
-svc_sheets_servspec[i,39] = sheets_PMs2[[4]][8]
-svc_sheets_servspec[i,40] = sheets_PMs2[[5]][8]
+svc_sheets_servspec[i,36] = ifelse(is.null(sheets_PMs2[[2]][8][[1]]) == TRUE, NA, sheets_PMs2[[2]][8][[1]])
+svc_sheets_servspec[i,37] = ifelse(is.null(sheets_PMs2[[3]][8][[1]]) == TRUE, NA, sheets_PMs2[[3]][8][[1]])
+svc_sheets_servspec[i,38] = ifelse(is.null(sheets_PMs2[[4]][8][[1]]) == TRUE, NA, sheets_PMs2[[4]][8][[1]])
+svc_sheets_servspec[i,39] = ifelse(is.null(sheets_PMs2[[5]][8][[1]]) == TRUE, NA, sheets_PMs2[[5]][8][[1]])
+svc_sheets_servspec[i,40] = ifelse(is.null(sheets_PMs2[[6]][8][[1]]) == TRUE, NA, sheets_PMs2[[6]][8][[1]])
 
 # KPI9
-svc_sheets_servspec[i,41] = sheets_PMs2[[1]][9]
-svc_sheets_servspec[i,42] = sheets_PMs2[[2]][9]
-svc_sheets_servspec[i,43] = sheets_PMs2[[3]][9]
-svc_sheets_servspec[i,44] = sheets_PMs2[[4]][9]
-svc_sheets_servspec[i,45] = sheets_PMs2[[5]][9]
+svc_sheets_servspec[i,41] = ifelse(is.null(sheets_PMs2[[2]][9][[1]]) == TRUE, NA, sheets_PMs2[[2]][9][[1]])
+svc_sheets_servspec[i,42] = ifelse(is.null(sheets_PMs2[[3]][9][[1]]) == TRUE, NA, sheets_PMs2[[3]][9][[1]])
+svc_sheets_servspec[i,43] = ifelse(is.null(sheets_PMs2[[4]][9][[1]]) == TRUE, NA, sheets_PMs2[[4]][9][[1]])
+svc_sheets_servspec[i,44] = ifelse(is.null(sheets_PMs2[[5]][9][[1]]) == TRUE, NA, sheets_PMs2[[5]][9][[1]])
+svc_sheets_servspec[i,45] = ifelse(is.null(sheets_PMs2[[6]][9][[1]]) == TRUE, NA, sheets_PMs2[[6]][9][[1]])
 
 # KPI10
-svc_sheets_servspec[i,46] = sheets_PMs2[[1]][10]
-svc_sheets_servspec[i,47] = sheets_PMs2[[2]][10]
-svc_sheets_servspec[i,48] = sheets_PMs2[[3]][10]
-svc_sheets_servspec[i,49] = sheets_PMs2[[4]][10]
-svc_sheets_servspec[i,50] = sheets_PMs2[[5]][10]
+svc_sheets_servspec[i,46] = ifelse(is.null(sheets_PMs2[[2]][10][[1]]) == TRUE, NA, sheets_PMs2[[2]][10][[1]])
+svc_sheets_servspec[i,47] = ifelse(is.null(sheets_PMs2[[3]][10][[1]]) == TRUE, NA, sheets_PMs2[[3]][10][[1]])
+svc_sheets_servspec[i,48] = ifelse(is.null(sheets_PMs2[[4]][10][[1]]) == TRUE, NA, sheets_PMs2[[4]][10][[1]])
+svc_sheets_servspec[i,49] = ifelse(is.null(sheets_PMs2[[5]][10][[1]]) == TRUE, NA, sheets_PMs2[[5]][10][[1]])
+svc_sheets_servspec[i,50] = ifelse(is.null(sheets_PMs2[[6]][10][[1]]) == TRUE, NA, sheets_PMs2[[6]][10][[1]])
 
 
 ### Pull out Pain Point metrics for CDDO (if no data present in table AT ALL, 
 # will say names must be same attribute as vector)
 sheets_PPs <- read_sheet(sheets_list$id[i]
         , sheet = 4
-        , range = "D8:F45"
+        , range = "B8:F45"
         , col_names = TRUE
     )
 
 ## Populate CDDO Pain Point table 
 # Customer Support
-svc_sheets_PP[i,1] = sheets_PPs[[1]][1]
-svc_sheets_PP[i,2] = sheets_PPs[[1]][2]
-svc_sheets_PP[i,3] = sheets_PPs[[1]][3]
-svc_sheets_PP[i,4] = sheets_PPs[[2]][1]
-svc_sheets_PP[i,5] = sheets_PPs[[3]][1]
+svc_sheets_PP[i,1] = ifelse(is.null(sheets_PPs[[3]][1][[1]]) == TRUE, NA, sheets_PPs[[3]][1][[1]])
+svc_sheets_PP[i,2] = ifelse(is.null(sheets_PPs[[3]][2][[1]]) == TRUE, NA, sheets_PPs[[3]][2][[1]])
+svc_sheets_PP[i,3] = ifelse(is.null(sheets_PPs[[3]][3][[1]]) == TRUE, NA, sheets_PPs[[3]][3][[1]])
+svc_sheets_PP[i,4] = ifelse(is.null(sheets_PPs[[4]][1][[1]]) == TRUE, NA, sheets_PPs[[4]][1][[1]])
+svc_sheets_PP[i,5] = ifelse(is.null(sheets_PPs[[5]][1][[1]]) == TRUE, NA, sheets_PPs[[5]][1][[1]])
 
 # Use of Paper
-svc_sheets_PP[i,6] = sheets_PPs[[1]][6]
-svc_sheets_PP[i,7] = sheets_PPs[[1]][7]
-svc_sheets_PP[i,8] = sheets_PPs[[1]][9]
-svc_sheets_PP[i,9] = sheets_PPs[[1]][10]
-svc_sheets_PP[i,10] = sheets_PPs[[1]][12]
-svc_sheets_PP[i,11] = sheets_PPs[[1]][13]
-svc_sheets_PP[i,12] = sheets_PPs[[2]][6]
-svc_sheets_PP[i,13] = sheets_PPs[[3]][6]
+svc_sheets_PP[i,6] = ifelse(is.null(sheets_PPs[[3]][6][[1]]) == TRUE, NA, sheets_PPs[[3]][6][[1]])
+svc_sheets_PP[i,7] = ifelse(is.null(sheets_PPs[[3]][7][[1]]) == TRUE, NA, sheets_PPs[[3]][7][[1]])
+svc_sheets_PP[i,8] = ifelse(is.null(sheets_PPs[[3]][9][[1]]) == TRUE, NA, sheets_PPs[[3]][9][[1]])
+svc_sheets_PP[i,9] = ifelse(is.null(sheets_PPs[[3]][10][[1]]) == TRUE, NA, sheets_PPs[[3]][10][[1]])
+svc_sheets_PP[i,10] = ifelse(is.null(sheets_PPs[[3]][12][[1]]) == TRUE, NA, sheets_PPs[[3]][12][[1]])
+svc_sheets_PP[i,11] = ifelse(is.null(sheets_PPs[[3]][13][[1]]) == TRUE, NA, sheets_PPs[[3]][13][[1]])
+svc_sheets_PP[i,12] = ifelse(is.null(sheets_PPs[[4]][6][[1]]) == TRUE, NA, sheets_PPs[[4]][6][[1]])
+svc_sheets_PP[i,13] = ifelse(is.null(sheets_PPs[[5]][6][[1]]) == TRUE, NA, sheets_PPs[[5]][6][[1]])
 
 # Automated Processing
-svc_sheets_PP[i,14] = sheets_PPs[[1]][15]
-svc_sheets_PP[i,15] = sheets_PPs[[1]][16]
-svc_sheets_PP[i,16] = sheets_PPs[[1]][17]
-svc_sheets_PP[i,17] = sheets_PPs[[2]][15]
-svc_sheets_PP[i,18] = sheets_PPs[[3]][15]
+svc_sheets_PP[i,14] = ifelse(is.null(sheets_PPs[[3]][15][[1]]) == TRUE, NA, sheets_PPs[[3]][15][[1]])
+svc_sheets_PP[i,15] = ifelse(is.null(sheets_PPs[[3]][16][[1]]) == TRUE, NA, sheets_PPs[[3]][16][[1]])
+svc_sheets_PP[i,16] = ifelse(is.null(sheets_PPs[[3]][17][[1]]) == TRUE, NA, sheets_PPs[[3]][17][[1]])
+svc_sheets_PP[i,17] = ifelse(is.null(sheets_PPs[[4]][15][[1]]) == TRUE, NA, sheets_PPs[[4]][15][[1]])
+svc_sheets_PP[i,18] = ifelse(is.null(sheets_PPs[[5]][15][[1]]) == TRUE, NA, sheets_PPs[[5]][15][[1]])
 
 # Legacy IT
-svc_sheets_PP[i,19] = sheets_PPs[[1]][19]
-svc_sheets_PP[i,20] = sheets_PPs[[2]][19]
-svc_sheets_PP[i,21] = sheets_PPs[[3]][19]
+svc_sheets_PP[i,19] = ifelse(is.null(sheets_PPs[[3]][19][[1]]) == TRUE, NA, sheets_PPs[[3]][19][[1]])
+svc_sheets_PP[i,20] = ifelse(is.null(sheets_PPs[[4]][19][[1]]) == TRUE, NA, sheets_PPs[[4]][19][[1]])
+svc_sheets_PP[i,21] = ifelse(is.null(sheets_PPs[[5]][19][[1]]) == TRUE, NA, sheets_PPs[[5]][19][[1]])
 
 # Performance Monitoring
-svc_sheets_PP[i,22] = sheets_PPs[[1]][22]
-svc_sheets_PP[i,23] = sheets_PPs[[1]][24]
-svc_sheets_PP[i,24] = sheets_PPs[[2]][22]
-svc_sheets_PP[i,25] = sheets_PPs[[3]][22]
+svc_sheets_PP[i,22] = ifelse(is.null(sheets_PPs[[3]][22][[1]]) == TRUE, NA, sheets_PPs[[3]][22][[1]])
+svc_sheets_PP[i,23] = ifelse(is.null(sheets_PPs[[3]][24][[1]]) == TRUE, NA, sheets_PPs[[3]][24][[1]])
+svc_sheets_PP[i,24] = ifelse(is.null(sheets_PPs[[4]][22][[1]]) == TRUE, NA, sheets_PPs[[4]][22][[1]])
+svc_sheets_PP[i,25] = ifelse(is.null(sheets_PPs[[5]][22][[1]]) == TRUE, NA, sheets_PPs[[4]][22][[1]])
 
 # Additional characteristics
-svc_sheets_PP[i,26] = sheets_PPs[[1]][27]
-svc_sheets_PP[i,27] = sheets_PPs[[1]][29]
-svc_sheets_PP[i,28] = sheets_PPs[[1]][30]
-
-# Usability - Accessibility
-svc_sheets_PP[i,29] = sheets_PPs[[1]][33]
-svc_sheets_PP[i,30] = sheets_PPs[[2]][33]
-svc_sheets_PP[i,31] = sheets_PPs[[3]][33]
+svc_sheets_PP[i,26] = ifelse(is.null(sheets_PPs[[3]][27][[1]]) == TRUE, NA, sheets_PPs[[3]][27][[1]])
+svc_sheets_PP[i,27] = ifelse(is.null(sheets_PPs[[3]][29][[1]]) == TRUE, NA, sheets_PPs[[3]][29][[1]])
+svc_sheets_PP[i,28] = ifelse(is.null(sheets_PPs[[3]][30][[1]]) == TRUE, NA, sheets_PPs[[3]][30][[1]])
 
 # Usability - Compliance
-svc_sheets_PP[i,32] = sheets_PPs[[1]][34]
-svc_sheets_PP[i,33] = sheets_PPs[[2]][34]
-
-# Usability - Burden
-svc_sheets_PP[i,34] = sheets_PPs[[1]][35]
-svc_sheets_PP[i,35] = sheets_PPs[[2]][35]
+svc_sheets_PP[i,29] = ifelse(is.null(sheets_PPs[[3]][33][[1]]) == TRUE, NA, sheets_PPs[[3]][33][[1]])
+svc_sheets_PP[i,30] = ifelse(is.null(sheets_PPs[[4]][33][[1]]) == TRUE, NA, sheets_PPs[[4]][33][[1]])
+svc_sheets_PP[i,31] = ifelse(is.null(sheets_PPs[[5]][33][[1]]) == TRUE, NA, sheets_PPs[[5]][33][[1]])
 
 # Usability - Complex Eligibility
-svc_sheets_PP[i,36] = sheets_PPs[[1]][37]
-svc_sheets_PP[i,37] = sheets_PPs[[2]][37]
-svc_sheets_PP[i,38] = sheets_PPs[[3]][37]
+svc_sheets_PP[i,32] = ifelse(is.null(sheets_PPs[[3]][35][[1]]) == TRUE, NA, sheets_PPs[[3]][35][[1]])
+svc_sheets_PP[i,33] = ifelse(is.null(sheets_PPs[[4]][35][[1]]) == TRUE, NA, sheets_PPs[[4]][35][[1]])
+svc_sheets_PP[i,34] = ifelse(is.null(sheets_PPs[[5]][35][[1]]) == TRUE, NA, sheets_PPs[[5]][35][[1]])
+
+### This section no longer needed because of incorrect template sent out,
+## keep for now as likely need it for next run.
+# Usability - Accessibility
+#svc_sheets_PP[i,29] = sheets_PPs[[1]][33]
+#svc_sheets_PP[i,30] = sheets_PPs[[2]][33]
+#svc_sheets_PP[i,31] = sheets_PPs[[3]][33]
+
+# Usability - Burden
+#svc_sheets_PP[i,34] = sheets_PPs[[1]][35]
+#svc_sheets_PP[i,35] = sheets_PPs[[2]][35]
+#svc_sheets_PP[i,35] = sheets_PPs[[3]][35]
 
 
 ### Pull out Pain Point metrics for service (if no data present in table AT ALL, 
 # will say names must be same attribute as vector)
 sheets_ssPPs <- read_sheet(sheets_list$id[i]
         , sheet = 4
-        , range = "B50:D60"
+        , range = "A48:D58" # Once template is corrected, should be A50:D60
         , col_names = TRUE
     )
 
 ## Populate Service Pain Point table, grouped by Theme
-svc_sheets_ssPP[i,1] = sheets_ssPPs[[1]][1]
-svc_sheets_ssPP[i,2] = sheets_ssPPs[[2]][1]
-svc_sheets_ssPP[i,3] = sheets_ssPPs[[3]][1]
+svc_sheets_ssPP[i,1] = ifelse(is.null(sheets_ssPPs[[2]][1][[1]]) == TRUE, NA, sheets_ssPPs[[2]][1][[1]])
+svc_sheets_ssPP[i,2] = ifelse(is.null(sheets_ssPPs[[3]][1][[1]]) == TRUE, NA, sheets_ssPPs[[3]][1][[1]])
+svc_sheets_ssPP[i,3] = ifelse(is.null(sheets_ssPPs[[4]][1][[1]]) == TRUE, NA, sheets_ssPPs[[4]][1][[1]])
 
-svc_sheets_ssPP[i,4] = sheets_ssPPs[[1]][2]
-svc_sheets_ssPP[i,5] = sheets_ssPPs[[2]][2]
-svc_sheets_ssPP[i,6] = sheets_ssPPs[[3]][2]
+svc_sheets_ssPP[i,4] = ifelse(is.null(sheets_ssPPs[[2]][2][[1]]) == TRUE, NA, sheets_ssPPs[[2]][2][[1]])
+svc_sheets_ssPP[i,5] = ifelse(is.null(sheets_ssPPs[[3]][2][[1]]) == TRUE, NA, sheets_ssPPs[[3]][2][[1]])
+svc_sheets_ssPP[i,6] = ifelse(is.null(sheets_ssPPs[[4]][2][[1]]) == TRUE, NA, sheets_ssPPs[[4]][2][[1]])
 
-svc_sheets_ssPP[i,7] = sheets_ssPPs[[1]][3]
-svc_sheets_ssPP[i,8] = sheets_ssPPs[[2]][3]
-svc_sheets_ssPP[i,9] = sheets_ssPPs[[3]][3]
+svc_sheets_ssPP[i,7] = ifelse(is.null(sheets_ssPPs[[2]][3][[1]]) == TRUE, NA, sheets_ssPPs[[2]][3][[1]])
+svc_sheets_ssPP[i,8] = ifelse(is.null(sheets_ssPPs[[3]][3][[1]]) == TRUE, NA, sheets_ssPPs[[3]][3][[1]])
+svc_sheets_ssPP[i,9] = ifelse(is.null(sheets_ssPPs[[4]][3][[1]]) == TRUE, NA, sheets_ssPPs[[4]][3][[1]])
 
-svc_sheets_ssPP[i,10] = sheets_ssPPs[[1]][4]
-svc_sheets_ssPP[i,11] = sheets_ssPPs[[2]][4]
-svc_sheets_ssPP[i,12] = sheets_ssPPs[[3]][4]
+svc_sheets_ssPP[i,10] = ifelse(is.null(sheets_ssPPs[[2]][4][[1]]) == TRUE, NA, sheets_ssPPs[[2]][4][[1]])
+svc_sheets_ssPP[i,11] = ifelse(is.null(sheets_ssPPs[[3]][4][[1]]) == TRUE, NA, sheets_ssPPs[[3]][4][[1]])
+svc_sheets_ssPP[i,12] = ifelse(is.null(sheets_ssPPs[[4]][4][[1]]) == TRUE, NA, sheets_ssPPs[[4]][4][[1]])
 
-svc_sheets_ssPP[i,13] = sheets_ssPPs[[1]][5]
-svc_sheets_ssPP[i,14] = sheets_ssPPs[[2]][5]
-svc_sheets_ssPP[i,15] = sheets_ssPPs[[3]][5]
+svc_sheets_ssPP[i,13] = ifelse(is.null(sheets_ssPPs[[2]][5][[1]]) == TRUE, NA, sheets_ssPPs[[2]][5][[1]])
+svc_sheets_ssPP[i,14] = ifelse(is.null(sheets_ssPPs[[3]][5][[1]]) == TRUE, NA, sheets_ssPPs[[3]][5][[1]])
+svc_sheets_ssPP[i,15] = ifelse(is.null(sheets_ssPPs[[4]][5][[1]]) == TRUE, NA, sheets_ssPPs[[4]][5][[1]])
 
-svc_sheets_ssPP[i,16] = sheets_ssPPs[[1]][6]
-svc_sheets_ssPP[i,17] = sheets_ssPPs[[2]][6]
-svc_sheets_ssPP[i,18] = sheets_ssPPs[[3]][6]
+svc_sheets_ssPP[i,16] = ifelse(is.null(sheets_ssPPs[[2]][6][[1]]) == TRUE, NA, sheets_ssPPs[[2]][6][[1]])
+svc_sheets_ssPP[i,17] = ifelse(is.null(sheets_ssPPs[[3]][6][[1]]) == TRUE, NA, sheets_ssPPs[[3]][6][[1]])
+svc_sheets_ssPP[i,18] = ifelse(is.null(sheets_ssPPs[[4]][6][[1]]) == TRUE, NA, sheets_ssPPs[[4]][6][[1]])
 
-svc_sheets_ssPP[i,19] = sheets_ssPPs[[1]][7]
-svc_sheets_ssPP[i,20] = sheets_ssPPs[[2]][7]
-svc_sheets_ssPP[i,21] = sheets_ssPPs[[3]][7]
+svc_sheets_ssPP[i,19] = ifelse(is.null(sheets_ssPPs[[2]][7][[1]]) == TRUE, NA, sheets_ssPPs[[2]][7][[1]])
+svc_sheets_ssPP[i,20] = ifelse(is.null(sheets_ssPPs[[3]][7][[1]]) == TRUE, NA, sheets_ssPPs[[3]][7][[1]])
+svc_sheets_ssPP[i,21] = ifelse(is.null(sheets_ssPPs[[4]][7][[1]]) == TRUE, NA, sheets_ssPPs[[4]][7][[1]])
 
-svc_sheets_ssPP[i,22] = sheets_ssPPs[[1]][8]
-svc_sheets_ssPP[i,23] = sheets_ssPPs[[2]][8]
-svc_sheets_ssPP[i,24] = sheets_ssPPs[[3]][8]
+svc_sheets_ssPP[i,22] = ifelse(is.null(sheets_ssPPs[[2]][8][[1]]) == TRUE, NA, sheets_ssPPs[[2]][8][[1]])
+svc_sheets_ssPP[i,23] = ifelse(is.null(sheets_ssPPs[[3]][8][[1]]) == TRUE, NA, sheets_ssPPs[[3]][8][[1]])
+svc_sheets_ssPP[i,24] = ifelse(is.null(sheets_ssPPs[[4]][8][[1]]) == TRUE, NA, sheets_ssPPs[[4]][8][[1]])
 
-svc_sheets_ssPP[i,25] = sheets_ssPPs[[1]][9]
-svc_sheets_ssPP[i,26] = sheets_ssPPs[[2]][9]
-svc_sheets_ssPP[i,27] = sheets_ssPPs[[3]][9]
+svc_sheets_ssPP[i,25] = ifelse(is.null(sheets_ssPPs[[2]][9][[1]]) == TRUE, NA, sheets_ssPPs[[2]][9][[1]])
+svc_sheets_ssPP[i,26] = ifelse(is.null(sheets_ssPPs[[3]][9][[1]]) == TRUE, NA, sheets_ssPPs[[3]][9][[1]])
+svc_sheets_ssPP[i,27] = ifelse(is.null(sheets_ssPPs[[4]][9][[1]]) == TRUE, NA, sheets_ssPPs[[4]][9][[1]])
 
-svc_sheets_ssPP[i,28] = sheets_ssPPs[[1]][10]
-svc_sheets_ssPP[i,29] = sheets_ssPPs[[2]][10]
-svc_sheets_ssPP[i,30] = sheets_ssPPs[[3]][10]
+svc_sheets_ssPP[i,28] = ifelse(is.null(sheets_ssPPs[[2]][10][[1]]) == TRUE, NA, sheets_ssPPs[[2]][10][[1]])
+svc_sheets_ssPP[i,29] = ifelse(is.null(sheets_ssPPs[[3]][10][[1]]) == TRUE, NA, sheets_ssPPs[[3]][10][[1]])
+svc_sheets_ssPP[i,30] = ifelse(is.null(sheets_ssPPs[[4]][10][[1]]) == TRUE, NA, sheets_ssPPs[[4]][10][[1]])
 
 }
+
+
