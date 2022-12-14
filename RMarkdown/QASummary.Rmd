@@ -18,9 +18,9 @@ output:
 
 ```{r setup, include=FALSE, echo = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-# Load in R variables and plots
-setwd("~/Repos/BaselineCommission")
+# Load in R variables and clarify location ahead of attempting to load
 load("my_data.RData")
+library(DT)
 ```
 
 # Background
@@ -29,12 +29,12 @@ flagging (as far as possible) the completeness of various sections of the baseli
 template commission.
 
 # Services included
-The following services baseline data has been collated across `r length(sheets_list)` 
-files.
+The following services baseline data has been collated across `r nrow(sheets_list)` 
+input template files.
 
 # Section completeness
-The table below shows how complete a section is in the baseline template per 
-service. A RAG colour has been assigned with the following thresholds
+The table below shows how complete each section is across all baseline templates. 
+A RAG colour has been assigned with the following thresholds
 
 * Green: Less than 25% of the fields in a section are blank
 * Yellow: Less than 50% of the fields in a section are blank
@@ -42,9 +42,14 @@ service. A RAG colour has been assigned with the following thresholds
 
 Please note, these are rough proportions given the varying size of the 
 sections themselves. For example, the service objectives table only has 4 
-fields
+fields. 
 
-# Field Trackers {.tabset}
+Where a section is left at the discretion of the service to fill in (i.e.
+service\-specific pain points), the proportion of services providing AT LEAST the
+first KPI name/Theme has been used but not the overall completion of all fields 
+in the relevant table (see 'Optional Section Completion').
+
+# Per Service Completion {.tabset}
 
 Please use the tabs to view the section of interest and the proportion of 
 fields across all services that have an entry present. 
@@ -53,9 +58,98 @@ Please note that the completion of service\-specific KPIs and
 service\-specific challenges can vary wildly across templates in their completion. These figures 
 should consequently be taken with a pinch of salt.
 
+## Context
+
 ## Objectives
 
 ## CDDO KPIs
 
-## Pain points
+## CDDO pain points
 
+# Field Completion by section {.tabset}
+
+## Context
+```{r context_fields, echo = FALSE, warning=FALSE}
+datatable(cntxt_section, style = 'bootstrap', options = list(   
+            initComplete = JS("function(settings, json) {",  
+                              "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") )
+          )
+```
+
+## Objectives
+```{r objectives_fields, echo = FALSE, warning=FALSE}
+datatable(objctvs_section, style = 'bootstrap', options = list(   
+            initComplete = JS("function(settings, json) {",  
+                              "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") )
+          )
+```
+
+## CDDO KPIs
+
+### Value Fields
+```{r CDDOKPI_fields, echo = FALSE, warning=FALSE}
+datatable(cddo_section_KPIs, style = 'bootstrap', options = list(   
+            initComplete = JS("function(settings, json) {",  
+                              "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") )
+          )
+```
+
+### Additional Information
+```{r CDDOAddInfo_fields, echo = FALSE, warning=FALSE}
+datatable(cddo_section_AddInfo, style = 'bootstrap', options = list(   
+            initComplete = JS("function(settings, json) {",  
+                              "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") )
+          )
+```
+
+### Free text
+```{r CDDOFreeText_fields, echo = FALSE, warning=FALSE}
+datatable(cddo_section_FreeText, style = 'bootstrap', options = list(   
+            initComplete = JS("function(settings, json) {",  
+                              "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") )
+          )
+```
+
+## CDDO pain points
+
+### Value Fields
+```{r CDDOPP_fields, echo = FALSE, warning=FALSE}
+datatable(cddoPP_section, style = 'bootstrap', options = list(   
+            initComplete = JS("function(settings, json) {",  
+                              "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") )
+          )
+```
+
+### Improvements
+```{r CDDOImprovements_fields, echo = FALSE, warning=FALSE}
+datatable(cddoPP_section_ImprovementsText, style = 'bootstrap', options = list(   
+            initComplete = JS("function(settings, json) {",  
+                              "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") )
+          )
+```
+
+### Challenges 
+```{r CDDOChallenges_fields, echo = FALSE, warning=FALSE}
+datatable(cddoPP_section_ChallengesText, style = 'bootstrap', options = list(   
+            initComplete = JS("function(settings, json) {",  
+                              "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") )
+          )
+```
+
+# Optional Section completion {.tabset}
+
+## Service-specific KPIs
+```{r servspec_KPIs, echo = FALSE, warning=FALSE}
+datatable(servspec_section, style = 'bootstrap', options = list(   
+            initComplete = JS("function(settings, json) {",  
+                              "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") )
+          )
+```
+
+## Service-specific pain points
+```{r servspec_PP, echo = FALSE, warning=FALSE}
+datatable(servspecPP_section, style = 'bootstrap', options = list(   
+            initComplete = JS("function(settings, json) {",  
+                              "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") )
+          )
+```

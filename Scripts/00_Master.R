@@ -20,6 +20,11 @@ library(clipr) # Write tables to clipboard
 library(data.table)
 library(geomtextpath) # Convenience, combines geom_vline with geom_text call
 library(ggpubr)
+library(naniar) # Easy treatment of NAs and blanks like ""
+library(knitr)
+library(markdown)
+library(kableExtra)
+library(DT)
 
 # Word Document scraping
 library(officer)
@@ -63,5 +68,5 @@ URL_collate <- "https://drive.google.com/drive/folders/1O56sQdBXEUNXZDc5OxksYEHA
 
 #### Scripts------------------------------------------------------------
 #source("01_DataLoadDocs.R")
-source("02_DataLoadSheets.R")
-source("03_DataWrangle.R")
+source("Scripts/02_DataLoadSheets.R")
+source("Scripts/03_DataCollate.R")

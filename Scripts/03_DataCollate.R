@@ -6,6 +6,56 @@
 # in google sheets and do cleaning on them before they are linked 
 # together.
 
+#### Set up some custom functions for QA flagging-----------------------
+check_completeness_section <- function(x) {
+  # Return the number of non-missing values divided by the total number of values
+  return(sum(!is.na(x)) / length(x))
+}
+
+## Quick function to create summary of section completeness by field within a 
+# given section table. By default, any columns you specify won't be included in
+# summary table unless you specify remove = FALSE, then includes ONLY those 
+# columns
+
+Need to specify the column names you DONT WANT e.g.
+# test2 <- fieldsection_maker(svc_sheets_cddo, c("AddInfo", "FreeText")). If leave 
+# blank, it calculates completeness for every field.
+fieldsection_maker <- function(df, names = NULL, remove = TRUE) {
+  if(is.null(names)){
+    
+    output <- as.data.frame(df %>% 
+                              summarize_all(funs(check_completeness_section)) %>% 
+                              t()) %>% 
+      rename(`Proportion Response` = 1) %>% 
+      mutate(`Proportion Response` = round(`Proportion Response` * 100.0, 1))
+    
+  } else {
+    
+    if(remove == TRUE) {
+      output <- as.data.frame(df %>% 
+                              select(-contains(names)
+                                     ) %>% 
+                              summarize_all(funs(check_completeness_section)) %>% 
+                              t()) %>% 
+        rename(`Proportion Response` = 1) %>% 
+        mutate(`Proportion Response` = round(`Proportion Response` * 100.0, 1))
+    
+    } else {
+      output <- as.data.frame(df %>% 
+                                select(contains(names)
+                                ) %>% 
+                                summarize_all(funs(check_completeness_section)) %>% 
+                                t()) %>% 
+        rename(`Proportion Response` = 1) %>% 
+        mutate(`Proportion Response` = round(`Proportion Response` * 100.0, 1))
+    }
+    
+    
+  }
+  return(output)
+}
+
+
 #### Set some variable values-------------------------------------------
 AVGFTECost = 27000
 WkHrsYr = 2080 # 40 hours per week as an average for now.
@@ -84,92 +134,49 @@ svc_sheets_servspec <- svc_sheets_servspec %>%
 
 ### Pain Points
 svc_sheets_PP <- svc_sheets_PP %>% 
+  
+  # Remove placeholder for Compliant Challenges text field (not currently used)
+  select(-`Usability_CompliantChallengesText`) %>% 
 
-    ## Customer Support section
-    mutate(
-        CSupport_ImprovementsText = str_replace_all(CSupport_ImprovementsText, 
-        fixed(c(
-            "Please specifiy any steps being taken to reduce burden on customer support teams, 
-            and the impacts this will have on the running costs of the service" = ""
-            , "Please specify any steps being taken to reduce burden on customer support teams, 
-            and the impacts this will have on the running costs of the service" = ""
-        )))
-        , CSupport_ChallengesText = str_replace(CSupport_ChallengesText, 
-        "E.g. why automated updates might not work, or have low impact in reducing burden to customer support teams"
-        , ""
-        )
+  ## Replace blank cell values with NAs and remove placeholder texts
+  replace_with_na_all(condition = ~.x == "") %>% 
+  
+  ## Customer Support section
+  mutate(
+        CSupport_ImprovementsText = gsub("any steps being taken to reduce burden on customer support teams", NA, 
+                                         CSupport_ImprovementsText)
+        , CSupport_ChallengesText = gsub("or have low impact in reducing burden to customer support teams", NA, 
+                                         CSupport_ChallengesText)
     
     ## Paper Use Section
-        , PaperUse_ImprovementsText = str_replace_all(PaperUse_ImprovementsText, 
-        fixed(c(
-            "Please specifiy any steps being taken to reduce use of paper when 
-            conducting transactions with users in your service, and the impacts 
-            this will have on the running costs of the service" = ""
-            , "Please specify any steps being taken to reduce use of paper when 
-            conducting transactions with users in your service, and the impacts 
-            this will have on the running costs of the service" = ""
-        )))
-        , PaperUse_ChallengesText = str_replace(PaperUse_ChallengesText, 
-        "E.g. specific requriements or challenges that the service has which 
-        prevent substituion of paper documents for digital alternatives, 
-        particularly where this is associated with large cohorts of users."
-        , ""
-        )
-
+        , PaperUse_ImprovementsText = gsub("any steps being taken to reduce use of paper when conducting transactions", NA, 
+                                           PaperUse_ImprovementsText)
+        , PaperUse_ChallengesText = gsub("challenges that the service has which prevent", NA, 
+                                         PaperUse_ChallengesText)
+    
     ## Auto
-        , Auto_ImprovementsText = str_replace(Auto_ImprovementsText, 
-        "Please specify any steps being taken to increase automated processing 
-        in your service, and the impacts this will have on the running costs of the service"
-        , ""
-        )
-        , Auto_ChallengesText = str_replace(Auto_ChallengesText, 
-        "What circumstances or challenges does your service have which would 
-        prevent straight through processing in some (or all) cases? "
-        , ""
-        )
+        , Auto_ImprovementsText = gsub("any steps being taken to increase automated processing", NA, Auto_ImprovementsText)
+        , Auto_ChallengesText = gsub("circumstances or challenges does your service have", NA, Auto_ChallengesText)
     
     ## Legacy
-        , Legacy_ImprovementsText = str_replace(Legacy_ImprovementsText, 
-        "Please specify any plans to remove or reduce the service's dependency on 
-        legacy IT. What impacts could this have on the running costs of the service?"
-        , ""
-        )
-        , Legacy_ChallengesText = str_replace(Legacy_ChallengesText, 
-        "What challenges does your service have to overcoming legacy IT dependence?"
-        , ""
-        )
+        , Legacy_ImprovementsText = gsub("What impacts could this have on the running costs", NA, Legacy_ImprovementsText)
+        , Legacy_ChallengesText = gsub("does your service have to overcoming legacy", NA, Legacy_ChallengesText)
 
     ## Performance Monitoring
-        , PMonitoring_ImprovementsText = str_replace(PMonitoring_ImprovementsText, 
-        "Please specify any plans to introduce or extend these features."
-        , ""
-        )
-        , PMonitoring_ChallengesText = str_replace(PMonitoring_ChallengesText, 
-        "What circumstances or challenges does your service have which makes these difficult to implement or run?"
-        , ""
-        )
+        , PMonitoring_ImprovementsText = gsub("plans to introduce or extend these features", NA, PMonitoring_ImprovementsText)
+        , PMonitoring_ChallengesText = gsub("circumstances or challenges does your service have which", NA, PMonitoring_ChallengesText)    
 
     ## Usability
-        , Usability_CompliantImprovementsText = str_replace(Usability_CompliantImprovementsText, 
-        "If not fully compliant what are the plans to achieve compliance."
-        , ""
-        )
-        #, Usability_CompliantChallengesText = str_replace(Usability_CompliantChallengesText, 
-        #""
-        #, ""
-        #)
-        , Usability_ComplexImprovementsText = str_replace(Usability_ComplexImprovementsText, 
-        "If yes, please specify any plans to lighten the complexity for users or staff"
-        , ""
-        )
-        , Usability_ComplexChallengesText = str_replace(Usability_ComplexChallengesText, 
-        "What circumstances, requirements or challenges does your service have which makes complex eligibility difficult to simplify?"
-        , ""
-        )
+        , Usability_CompliantImprovementsText = gsub("what are the plans to achieve compliance", NA, Usability_CompliantImprovementsText)
+        #, Usability_CompliantChallengesText = gsub("", NA, Usability_CompliantChallengesText) 
+    
+        , Usability_ComplexImprovementsText = gsub("plans to lighten the complexity for users or staff", NA, Usability_ComplexImprovementsText)
+        , Usability_ComplexChallengesText = gsub("challenges does your service have which makes complex eligibility", NA, Usability_ComplexChallengesText)
+    
+  )
 
-    )
 
-#### Create tables------------------------------------------------------
+#### Create tables for Google sheet -------------------------------------
 
 ### Context and Objectives
 svc_sheets_cntxtobjectvs  <- cbind(
@@ -344,16 +351,101 @@ svc_sheets_overall_final <- cbind(
 )
 
 #### Create placeholder views for QA document---------------------------
-### Percentage complete per section
-complete_cntxt <- as.data.frame(colMeans(is.na(svc_sheets_cntxt %>% 
-select(-ServiceID
-    , -SourceFile
-    , -FileLink)
-    ))) %>% 
-select(`Proportion Response` = 1) * 100.0
-#### Save to a .rds file for tracking via RMarkdown---------------------
 
-save(sheets_list, complete_cntxt, file = "my_data.RData")
+### Overall section completeness across all services
+
+
+### Individual service section completion
+
+
+### Field completion across all services by section
+
+## Context
+cntxt_section <- fieldsection_maker(svc_sheets_cntxt, names = c("ServiceID", "SourceFile", "FileLink"))
+
+## Objectives
+objctvs_section <- fieldsection_maker(svc_sheets_objctvs)
+
+## CDDO KPIs
+cddo_section_KPIs <- fieldsection_maker(svc_sheets_cddo
+                                        , names = c("AddInfo", "FreeText"))
+cddo_section_AddInfo <- fieldsection_maker(svc_sheets_cddo
+                                           , names = c("AddInfo"), remove = FALSE)
+cddo_section_FreeText <- fieldsection_maker(svc_sheets_cddo
+                                            , names = c("FreeText"), remove = FALSE)
+
+## CDDO-specific Pain points
+cddoPP_section <- fieldsection_maker(svc_sheets_PP
+                                     , names = c("ImprovementsText", "ChallengesText"))
+cddoPP_section_ImprovementsText <- fieldsection_maker(svc_sheets_PP
+                                                      , names = c("ImprovementsText"), remove = FALSE)
+cddoPP_section_ChallengesText <- fieldsection_maker(svc_sheets_PP
+                                                    , names = c("ChallengesText"), remove = FALSE)
+
+## Service Specific KPIs
+servspecKPI_section <- fieldsection_maker(svc_sheets_servspec)
+rows = c("KPI1", "KPI2", "KPI3", "KPI4", "KPI5", "KPI6", "KPI7", "KPI8", "KPI9", "KPI10")
+servspec_section <- data.frame(
+  `Name` = numeric()
+  , `Description` = numeric()
+  , `Value` = numeric()
+  , `AdditionalInfo` = numeric()
+  , `FreeText` = numeric()
+  , stringsAsFactors = FALSE
+)
+
+j = 1
+for (i in 1:10){
+  servspec_section[i, 1] = servspecKPI_section$`Proportion Response`[j]
+  servspec_section[i, 2] = servspecKPI_section$`Proportion Response`[j+1]
+  servspec_section[i, 3] = servspecKPI_section$`Proportion Response`[j+2]
+  servspec_section[i, 4] = servspecKPI_section$`Proportion Response`[j+3]
+  servspec_section[i, 5] = servspecKPI_section$`Proportion Response`[j+4]
+
+ j = j + 5
+  
+}
+rownames(servspec_section) = rows
+
+## Service Specific Pain points
+servspecpains_section <- fieldsection_maker(svc_sheets_ssPP)
+rows = c("PP1", "PP2", "PP3", "PP4", "PP5", "PP6", "PP7", "PP8", "PP9", "PP10")
+servspecPP_section <- data.frame(
+  `Theme` = numeric()
+  , `Description` = numeric()
+  , `CDDOSupport` = numeric()
+  , stringsAsFactors = FALSE
+)
+
+j = 1
+for (i in 1:10){
+  servspecPP_section[i, 1] = servspecpains_section$`Proportion Response`[j]
+  servspecPP_section[i, 2] = servspecpains_section$`Proportion Response`[j+1]
+  servspecPP_section[i, 3] = servspecpains_section$`Proportion Response`[j+2]
+  
+  j = j + 3
+  
+}
+rownames(servspecPP_section) = rows
+
+#### Save to a .rds file for tracking via RMarkdown---------------------
+#### SAVE GLOBAL ENVIRONMENT TO LOAD TO RMARKDOWN ----
+save(sheets_list
+     
+     # Field completion % by section tables
+     , cntxt_section
+     , objctvs_section
+     , cddo_section_KPIs
+     , cddo_section_AddInfo
+     , cddo_section_FreeText
+     , cddoPP_section
+     , cddoPP_section_ImprovementsText 
+     , cddoPP_section_ChallengesText
+     , servspec_section
+     , servspecPP_section
+     
+     
+     , file = "RMarkdown/my_data.RData")
 
 
 

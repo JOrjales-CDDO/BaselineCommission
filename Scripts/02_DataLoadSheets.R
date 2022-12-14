@@ -521,7 +521,7 @@ svc_sheets_PP[i,21] = ifelse(is.null(sheets_PPs[[5]][19][[1]]) == TRUE, NA, shee
 svc_sheets_PP[i,22] = ifelse(is.null(sheets_PPs[[3]][22][[1]]) == TRUE, NA, sheets_PPs[[3]][22][[1]])
 svc_sheets_PP[i,23] = ifelse(is.null(sheets_PPs[[3]][24][[1]]) == TRUE, NA, sheets_PPs[[3]][24][[1]])
 svc_sheets_PP[i,24] = ifelse(is.null(sheets_PPs[[4]][22][[1]]) == TRUE, NA, sheets_PPs[[4]][22][[1]])
-svc_sheets_PP[i,25] = ifelse(is.null(sheets_PPs[[5]][22][[1]]) == TRUE, NA, sheets_PPs[[4]][22][[1]])
+svc_sheets_PP[i,25] = ifelse(is.null(sheets_PPs[[5]][22][[1]]) == TRUE, NA, sheets_PPs[[5]][22][[1]])
 
 # Additional characteristics
 svc_sheets_PP[i,26] = ifelse(is.null(sheets_PPs[[3]][27][[1]]) == TRUE, NA, sheets_PPs[[3]][27][[1]])
