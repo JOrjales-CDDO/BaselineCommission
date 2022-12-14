@@ -36,18 +36,26 @@ input template files.
 The table below shows how complete each section is across all baseline templates. 
 A RAG colour has been assigned with the following thresholds
 
-* Green: Less than 25% of the fields in a section are blank
-* Yellow: Less than 50% of the fields in a section are blank
-* Red: 50% or more of the fields in a section are blank
+* Green: More than 75% of the fields in a section across all services are complete.
+* Yellow: Between 50% and 75% of the fields in a section across all services are complete.
+* Red: Less than 50% of the fields in a section are complete.
 
 Please note, these are rough proportions given the varying size of the 
 sections themselves. For example, the service objectives table only has 4 
-fields. 
+fields. In addition, additional info/free text fields have been separated from 
+value fields to provide a more granular overview of key sections of interest.
 
 Where a section is left at the discretion of the service to fill in (i.e.
 service\-specific pain points), the proportion of services providing AT LEAST the
 first KPI name/Theme has been used but not the overall completion of all fields 
 in the relevant table (see 'Optional Section Completion').
+
+```{r overall, echo = FALSE, warning=FALSE}
+datatable(overall_completeness, style = 'bootstrap', options = list(   
+            initComplete = JS("function(settings, json) {",  
+                              "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") )
+          )
+```
 
 # Per Service Completion {.tabset}
 

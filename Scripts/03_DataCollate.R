@@ -7,17 +7,26 @@
 # together.
 
 #### Set up some custom functions for QA flagging-----------------------
+
+# Calculate the proportion of NAs across entire table
+section_nas <- function(df) {
+  
+  na_prop <- colMeans(is.na(df), na.rm = TRUE)
+  
+  # Return the mean of the NA proportions across all columns
+  return(mean(na_prop))
+}
+
+## Convenience function to derive NA proportion per column
 check_completeness_section <- function(x) {
   # Return the number of non-missing values divided by the total number of values
   return(sum(!is.na(x)) / length(x))
 }
 
-## Quick function to create summary of section completeness by field within a 
+## Function to create summary of section completeness by field within a 
 # given section table. By default, any columns you specify won't be included in
 # summary table unless you specify remove = FALSE, then includes ONLY those 
 # columns
-
-Need to specify the column names you DONT WANT e.g.
 # test2 <- fieldsection_maker(svc_sheets_cddo, c("AddInfo", "FreeText")). If leave 
 # blank, it calculates completeness for every field.
 fieldsection_maker <- function(df, names = NULL, remove = TRUE) {
@@ -26,8 +35,8 @@ fieldsection_maker <- function(df, names = NULL, remove = TRUE) {
     output <- as.data.frame(df %>% 
                               summarize_all(funs(check_completeness_section)) %>% 
                               t()) %>% 
-      rename(`Proportion Response` = 1) %>% 
-      mutate(`Proportion Response` = round(`Proportion Response` * 100.0, 1))
+      rename(`Proportion Complete` = 1) %>% 
+      mutate(`Proportion Complete` = round(`Proportion Complete` * 100.0, 1))
     
   } else {
     
@@ -37,8 +46,8 @@ fieldsection_maker <- function(df, names = NULL, remove = TRUE) {
                                      ) %>% 
                               summarize_all(funs(check_completeness_section)) %>% 
                               t()) %>% 
-        rename(`Proportion Response` = 1) %>% 
-        mutate(`Proportion Response` = round(`Proportion Response` * 100.0, 1))
+        rename(`Proportion Complete` = 1) %>% 
+        mutate(`Proportion Complete` = round(`Proportion Complete` * 100.0, 1))
     
     } else {
       output <- as.data.frame(df %>% 
@@ -46,8 +55,8 @@ fieldsection_maker <- function(df, names = NULL, remove = TRUE) {
                                 ) %>% 
                                 summarize_all(funs(check_completeness_section)) %>% 
                                 t()) %>% 
-        rename(`Proportion Response` = 1) %>% 
-        mutate(`Proportion Response` = round(`Proportion Response` * 100.0, 1))
+        rename(`Proportion Complete` = 1) %>% 
+        mutate(`Proportion Complete` = round(`Proportion Complete` * 100.0, 1))
     }
     
     
@@ -354,6 +363,64 @@ svc_sheets_overall_final <- cbind(
 
 ### Overall section completeness across all services
 
+overall_completeness <- as.data.frame(rbind(
+  
+  # Context 
+  "Context" = round((1.0 - section_nas(svc_sheets_cntxt %>% 
+                select(-ServiceID
+                       , -SourceFile
+                       , -FileLink)
+  )) * 100.0, 1)
+  
+   # Objectives
+  , "Objectives" = round((1.0 - section_nas(svc_sheets_objctvs)) * 100.0, 1)
+  
+  # CDDO KPI fields
+  , "CDDO KPI Values" = round((1.0 - section_nas(svc_sheets_cddo %>% 
+                  select(-contains(c("AddInfo", "FreeText")))
+                  )) * 100.0, 1)
+  
+  # CDDO Additional Info fields
+  , "CDDO KPI Additional Info" = round((1.0 - section_nas(svc_sheets_cddo %>% 
+                               select(contains(c("AddInfo")))
+                             )) * 100.0, 1)
+  
+  # CDDO Free Text
+  , "CDDO KPI Free Text" = round((1.0 - section_nas(svc_sheets_cddo %>% 
+                               select(-contains(c("FreeText")))
+                             )) * 100.0, 1)
+  
+  # CDDO Pain Points
+  , "CDDO Pain Points" = round((1.0 - section_nas(svc_sheets_PP %>% 
+                               select(-contains(c("ImprovementsText"
+                                                  , "ChallengesText")))
+                             )) * 100.0, 1)
+  
+  # CDDO Improvements
+  , "CDDO Pain Points - Improvement Text" = round((1.0 - section_nas(svc_sheets_PP %>% 
+                               select(contains(c("ImprovementsText")))
+                             )) * 100.0, 1)
+  
+  # CDDO Challenges
+  , "CDDO Pain Points - Challenges Text" = round((1.0 - section_nas(svc_sheets_PP %>% 
+                               select(contains(c("ChallengesText")))
+                             )) * 100.0, 1)
+  
+  # Service Specific KPIs (first row only)
+  , "Service-specific KPIs" = round((1.0 - section_nas(svc_sheets_servspec %>% 
+                               select(contains(c("KPI1_Name")))
+                             )) * 100.0, 1)
+  
+  # Service Specific Pain points (first row only)
+  , "Service-specific Pain Points" = round((1.0 - section_nas(svc_sheets_ssPP %>% 
+                               select(contains(c("Theme1_Name")))
+  )) * 100.0, 1)
+  
+)
+) %>% 
+  rename("Proportion complete" = 1)
+
+
 
 ### Individual service section completion
 
@@ -396,11 +463,11 @@ servspec_section <- data.frame(
 
 j = 1
 for (i in 1:10){
-  servspec_section[i, 1] = servspecKPI_section$`Proportion Response`[j]
-  servspec_section[i, 2] = servspecKPI_section$`Proportion Response`[j+1]
-  servspec_section[i, 3] = servspecKPI_section$`Proportion Response`[j+2]
-  servspec_section[i, 4] = servspecKPI_section$`Proportion Response`[j+3]
-  servspec_section[i, 5] = servspecKPI_section$`Proportion Response`[j+4]
+  servspec_section[i, 1] = servspecKPI_section$`Proportion Complete`[j]
+  servspec_section[i, 2] = servspecKPI_section$`Proportion Complete`[j+1]
+  servspec_section[i, 3] = servspecKPI_section$`Proportion Complete`[j+2]
+  servspec_section[i, 4] = servspecKPI_section$`Proportion Complete`[j+3]
+  servspec_section[i, 5] = servspecKPI_section$`Proportion Complete`[j+4]
 
  j = j + 5
   
@@ -419,9 +486,9 @@ servspecPP_section <- data.frame(
 
 j = 1
 for (i in 1:10){
-  servspecPP_section[i, 1] = servspecpains_section$`Proportion Response`[j]
-  servspecPP_section[i, 2] = servspecpains_section$`Proportion Response`[j+1]
-  servspecPP_section[i, 3] = servspecpains_section$`Proportion Response`[j+2]
+  servspecPP_section[i, 1] = servspecpains_section$`Proportion Complete`[j]
+  servspecPP_section[i, 2] = servspecpains_section$`Proportion Complete`[j+1]
+  servspecPP_section[i, 3] = servspecpains_section$`Proportion Complete`[j+2]
   
   j = j + 3
   
@@ -431,6 +498,9 @@ rownames(servspecPP_section) = rows
 #### Save to a .rds file for tracking via RMarkdown---------------------
 #### SAVE GLOBAL ENVIRONMENT TO LOAD TO RMARKDOWN ----
 save(sheets_list
+     
+     # Overall completeness 
+     , overall_completeness
      
      # Field completion % by section tables
      , cntxt_section
