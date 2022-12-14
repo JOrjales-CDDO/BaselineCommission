@@ -18,6 +18,8 @@ library(stringi) # Easier manipulation of strings
 library(scales) # Automatically determines breaks and labels for axes and legends
 library(clipr) # Write tables to clipboard
 library(data.table)
+library(geomtextpath) # Convenience, combines geom_vline with geom_text call
+library(ggpubr)
 
 # Word Document scraping
 library(officer)
@@ -25,6 +27,9 @@ library(officer)
 # Sheets webscraping
 library(googlesheets4)
 library(googledrive)
+
+# Miscellaneous
+library(wordstonumbers) # Convert text numbers to numeric numbers e.g four to 4
 
 ## Custom Functions
 # Write clip function, writes last table created to the clipboard ready to be
@@ -48,10 +53,10 @@ snapshot = "December 2022"
 setwd("~/Repos/BaselineCommission")
 
 # Google Drive storage folder for returns
-URL <- "https://drive.google.com/drive/folders/1U6LZnpjxSw16oPXf8BRjKmF_NjC-nm68"
+URL <- "https://drive.google.com/drive/folders/1wGGdygAufpQTBg8aeciDpWCNRODm2mbQ"
 
 # Google Drive storage folder for collated output
-URL_collate <- "https://https://drive.google.com/drive/folders/12q6DA_yyyTjSxD8hbYJaG1lD2w0-A5Yp"
+URL_collate <- "https://drive.google.com/drive/folders/1O56sQdBXEUNXZDc5OxksYEHAXUBDGyex"
 
 # Local folder for Word documents (no longer needed)
 # DocsLocal <- "/Users/jose.orjales/Repos/Commission/Data/01_CommissionDocs/"

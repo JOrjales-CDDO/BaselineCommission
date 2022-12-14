@@ -1,0 +1,61 @@
+---
+title: "Baseline Commission QA Summary"
+author: "Transforming Government Services"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    code_folding: hide
+    df_print: kable
+    highlight: pygment
+    number_sections: no
+    theme: cerulean
+    toc: yes
+    toc_collapsed: yes
+    toc_depth: 5
+    toc_float: yes # Must be after toc_depth
+---
+
+
+```{r setup, include=FALSE, echo = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Load in R variables and plots
+setwd("~/Repos/BaselineCommission")
+load("my_data.RData")
+```
+
+# Background
+This HTML document is designed to be the counterpart to the R collation process,
+flagging (as far as possible) the completeness of various sections of the baseline 
+template commission.
+
+# Services included
+The following services baseline data has been collated across `r length(sheets_list)` 
+files.
+
+# Section completeness
+The table below shows how complete a section is in the baseline template per 
+service. A RAG colour has been assigned with the following thresholds
+
+* Green: Less than 25% of the fields in a section are blank
+* Yellow: Less than 50% of the fields in a section are blank
+* Red: 50% or more of the fields in a section are blank
+
+Please note, these are rough proportions given the varying size of the 
+sections themselves. For example, the service objectives table only has 4 
+fields
+
+# Field Trackers {.tabset}
+
+Please use the tabs to view the section of interest and the proportion of 
+fields across all services that have an entry present. 
+
+Please note that the completion of service\-specific KPIs and 
+service\-specific challenges can vary wildly across templates in their completion. These figures 
+should consequently be taken with a pinch of salt.
+
+## Objectives
+
+## CDDO KPIs
+
+## Pain points
+

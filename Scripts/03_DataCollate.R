@@ -17,7 +17,7 @@ WkHrsYr = 2080 # 40 hours per week as an average for now.
 ### Context Table
 svc_sheets_cntxt <- svc_sheets_cntxt %>% 
     mutate(
-        URLGovUK = str_replace(URLGovUK, "https://www.gov.uk/", "")
+        URLGovUK = str_replace(URLGovUK, "https://www.gov.uk", "")
     )
 
 ### Objectives table
@@ -32,28 +32,28 @@ svc_sheets_cddo <- svc_sheets_cddo %>%
         )
 
         # Timeliness KPI conversions
-        , UsersJourneyTimeFlag = ifelse(str_detect(UsersJourneyTime, "d") == TRUE, "days"
-            , ifelse(str_detect(UsersJourneyTime, "h") == TRUE, "hours"
-                , ifelse(str_detect(UsersJourneyTime, "ms") == TRUE, "months"
-                    , ifelse(str_detect(UsersJourneyTime, "w") == TRUE, "weeks"
-                        , ifelse(str_detect(UsersJourneyTime, "m") == TRUE, "minutes"
+        , UsersJourneyTimeFlag = ifelse(str_detect(UsersJourneyTimeHours, "d") == TRUE, "days"
+            , ifelse(str_detect(UsersJourneyTimeHours, "h") == TRUE, "hours"
+                , ifelse(str_detect(UsersJourneyTimeHours, "ms") == TRUE, "months"
+                    , ifelse(str_detect(UsersJourneyTimeHours, "w") == TRUE, "weeks"
+                        , ifelse(str_detect(UsersJourneyTimeHours, "m") == TRUE, "minutes"
                             , "other"
                         )))))
         
         , UsersJourneyTime2 = ifelse(UsersJourneyTimeFlag == "minutes"
-            , str_replace(UsersJourneyTime, "m", "")
+            , str_replace(UsersJourneyTimeHours, "m", "")
             , ifelse(UsersJourneyTimeFlag == "hours"
-                , str_replace(UsersJourneyTime, "h", "")
+                , str_replace(UsersJourneyTimeHours, "h", "")
                 , ifelse(UsersJourneyTimeFlag == "days"
-                    , str_replace(UsersJourneyTime, "d", "")
+                    , str_replace(UsersJourneyTimeHours, "d", "")
                     , ifelse(UsersJourneyTimeFlag == "weeks"
-                        , str_replace(UsersJourneyTime, "w", "")
+                        , str_replace(UsersJourneyTimeHours, "w", "")
                         , ifelse(UsersJourneyTimeFlag == "months"
-                            , str_replace(UsersJourneyTime, "ms", "")
+                            , str_replace(UsersJourneyTimeHours, "ms", "")
                             , NA
                         )))))
 
-        , UsersJourneyTime = ifelse(UsersJourneyTimeFlag == "minutes"
+        , UsersJourneyTimeHours = ifelse(UsersJourneyTimeFlag == "minutes"
             , round(as.numeric(UsersJourneyTime2) / 60.0, 2)
             , ifelse(UsersJourneyTimeFlag == "days"
                 , round(as.numeric(UsersJourneyTime2) * 24.0, 2)
@@ -64,7 +64,7 @@ svc_sheets_cddo <- svc_sheets_cddo %>%
                         , round(as.numeric(UsersJourneyTime2) * 168.6, 2)
                         , ifelse(UsersJourneyTimeFlag == "months"
                         # Based on 365.25 days X 24 hours / 12 months = 730.5 hours
-                            , round(as.numeric(UsersJourneyTimes) * 730.5, 2)
+                            , round(as.numeric(UsersJourneyTime2) * 730.5, 2)
                             , NA
                     )))))
     ) %>% 
@@ -238,7 +238,7 @@ svc_sheets_KPIcalcs <- svc_sheets_cddo %>%
         as.numeric(StartedDigitalTransactions) * 100.0, 1)
 
         , CDDOKPI_UserSatisfaction = round((as.numeric(UsersVerySatisfied) + 
-            as.numeric(UsersSatisfied)) / as.numeric(UsersRespondents) * 100.0, 1)
+            as.numeric(UsersSatisfied)) / as.numeric(UsersTotalSatisfactionRespondents) * 100.0, 1)
 
         , CDDOKPI_TransactionCost = round((as.numeric(FTECount) * AVGFTECost + 
             NonStaffCost) / as.numeric(CompletedTransactions), 2)
@@ -256,7 +256,7 @@ svc_sheets_KPIcalcs <- svc_sheets_cddo %>%
     , StartedDigitalTransactions
     , UsersVerySatisfied 
     , UsersSatisfied 
-    , UsersRespondents
+    , UsersTotalSatisfactionRespondents
     , FTECount
     , NonStaffCost
     , UsersEmail
@@ -266,7 +266,7 @@ svc_sheets_KPIcalcs <- svc_sheets_cddo %>%
     , CDDOKPI_DigitalCompletion
     , CDDOKPI_UserSatisfaction
     , Complaints
-    , UsersJourneyTime
+    , UsersJourneyTimeHours
     , CDDOKPI_TransactionCost
     , CDDOKPI_StaffTime
     , AutomatedTransactions
@@ -285,7 +285,14 @@ bespoke_CDDOKPI <- cbind(svc_sheets_cntxt %>%
 
 ### Opportunity Analysis
 bespoke_OppA <- cbind(svc_sheets_cntxt
-    , svc_sheets_PP) %>%
+    , svc_sheets_PP
+    , svc_sheets_cddo) %>%
+
+    mutate(ChannelShift_TransactionsFlag = ifelse(
+        !is.na(CompletedTransactions) == TRUE & 
+        !is.na(CompletedDigitalTransactions) == TRUE, 
+        "Yes", "No")
+    )  %>% 
     select(ServiceID
         , Service
         , URLGovUK
@@ -294,6 +301,27 @@ bespoke_OppA <- cbind(svc_sheets_cntxt
         , CSupport_TeamExists
         , CSupport_StatusExists
         , CSupport_ContactCount
+
+        , PaperUse_LettersSendExist
+        , PaperUse_LettersSendCount
+        , PaperUse_LettersReceiveExist
+        , PaperUse_LettersReceiveCount
+        , PaperUse_SignatureExist
+        , PaperUse_SignaturePercent
+
+        , Auto_ManCheckExists
+        , Auto_NoHuman
+        , Auto_Judgement
+
+        , Additional_IDCheckExists
+        , Additional_TaxDisburse
+        , Additional_FundingAward
+
+        , ChannelShift_TransactionsFlag
+        , CompletedDigitalTransactions
+        , CompletedTransactions
+
+        , Legacy_PlusTenYear
     )
 
 #### Create master final table with ALL fields present------------------
@@ -325,7 +353,8 @@ select(-ServiceID
 select(`Proportion Response` = 1) * 100.0
 #### Save to a .rds file for tracking via RMarkdown---------------------
 
-save(complete_cntxt, file = "QA.RData")
+save(sheets_list, complete_cntxt, file = "my_data.RData")
+
 
 
 

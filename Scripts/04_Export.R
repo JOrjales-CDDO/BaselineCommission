@@ -5,7 +5,7 @@
 # This script is to write to Google sheets the various tables set up
 # in 03_DataCollate.R.
 
-#### Create placeholder sheet in local drive----------------------------
+#### Create placeholder sheet in local MY DRIVE-------------------------
 gs4_create(name = paste0(snapshot, " - ServiceBaselines_"
     , format(Sys.time(), "%Y%m%d"))
     , sheets = c("AllData"
@@ -24,8 +24,9 @@ gs4_create(name = paste0(snapshot, " - ServiceBaselines_"
 sheet_id <- drive_get(paste0(snapshot, " - ServiceBaselines_"
     , format(Sys.time(), "%Y%m%d")))
 
+foo <- shared_drive_get("Transforming Government Services")
 folder_id <- drive_find(n_max = 10
-    , pattern = "Collated Datasets")$id # Be careful of this,
+    , pattern = "All Services Datasets", shared_drive = foo)$id # Be careful of this,
 # if have more than one folder called 99_Testing, will find all of them.
 
 #### Send tables to placeholder sheet(s)--------------------------------
