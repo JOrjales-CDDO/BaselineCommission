@@ -1,5 +1,5 @@
 ######################################
-# 01_DataCollate.R
+# 03_DataCollate.R
 ######################################
 
 # This script is designed to collate the tables together from reading 
@@ -11,10 +11,22 @@
 # Calculate the proportion of NAs across entire table
 section_nas <- function(df) {
   
-  na_prop <- colMeans(is.na(df), na.rm = TRUE)
+  na_prop <- colMeans(!is.na(df), na.rm = TRUE)
   
   # Return the mean of the NA proportions across all columns
   return(mean(na_prop))
+}
+
+# Calculate the proportion of NAs by row across table
+row_nas <- function(df) {
+  
+  na_prop <- apply(df, 1, function(x) {
+    sum(!is.na(x)) / length(x)
+  })
+  
+  # Return as data frame we can extract from
+  
+  return(data.frame(na_prop))
 }
 
 ## Convenience function to derive NA proportion per column
@@ -66,8 +78,8 @@ fieldsection_maker <- function(df, names = NULL, remove = TRUE) {
 
 
 #### Set some variable values-------------------------------------------
-AVGFTECost = 27000
-WkHrsYr = 2080 # 40 hours per week as an average for now.
+AVGFTECost = 41500 # Provided by Ed Mack, EO FTE overhead.
+WkHrsYr = 1857.4 # 7.4 hours/day, 251 working days.
 
 #### Cleaning and Transformation----------------------------------------
 
@@ -76,7 +88,7 @@ WkHrsYr = 2080 # 40 hours per week as an average for now.
 ### Context Table
 svc_sheets_cntxt <- svc_sheets_cntxt %>% 
     mutate(
-        URLGovUK = str_replace(URLGovUK, "https://www.gov.uk", "")
+        URLGovUKStart = str_replace(URLGovUKStart, "https://www.gov.uk", "")
     )
 
 ### Objectives table
@@ -192,7 +204,7 @@ svc_sheets_cntxtobjectvs  <- cbind(
     svc_sheets_cntxt %>% 
         select(ServiceID
         , Service
-        , URLGovUK
+        , URLGovUKStart
         )
     , svc_sheets_objctvs
 )
@@ -202,7 +214,7 @@ svc_sheets_cntxtcddo <- cbind(
     svc_sheets_cntxt %>% 
         select(ServiceID
         , Service
-        , URLGovUK
+        , URLGovUKStart
         )
     , svc_sheets_cddo
 )
@@ -212,7 +224,7 @@ svc_sheets_cntxtservspec  <- cbind(
     svc_sheets_cntxt %>% 
         select(ServiceID
         , Service
-        , URLGovUK
+        , URLGovUKStart
         )
     , svc_sheets_servspec
 )
@@ -222,7 +234,7 @@ svc_sheets_cntxtPP  <- cbind(
     svc_sheets_cntxt %>% 
         select(ServiceID
         , Service
-        , URLGovUK
+        , URLGovUKStart
         )
     , svc_sheets_PP
 )
@@ -233,7 +245,7 @@ svc_sheets_cntxtssPP <- cbind(
         select(ServiceID
         , Service
         , URLService
-        , URLGovUK
+        , URLGovUKStart
         )
     , svc_sheets_ssPP
 )
@@ -292,7 +304,7 @@ svc_sheets_KPIcalcs <- svc_sheets_cddo %>%
 bespoke_CDDOKPI <- cbind(svc_sheets_cntxt %>%
     select(ServiceID
         , Service
-        , URLGovUK
+        , URLGovUKStart
         , DepartmentParent
         , DepartmentChild
     )
@@ -311,7 +323,7 @@ bespoke_OppA <- cbind(svc_sheets_cntxt
     )  %>% 
     select(ServiceID
         , Service
-        , URLGovUK
+        , URLGovUKStart
         , DepartmentParent
         , DepartmentChild
         , CSupport_TeamExists
@@ -361,58 +373,77 @@ svc_sheets_overall_final <- cbind(
 
 #### Create placeholder views for QA document---------------------------
 
+### Create CDDO Pain Point QA version of table subject to logic (to avoid
+# counting cells that are empty that are correctly left empty! e.g. Q1b - 
+# if no go to Q2)
+
+svc_sheets_PP_QA <- svc_sheets_PP %>% 
+  mutate(CSupport_StatusExists = ifelse(CSupport_TeamExists == "Yes", CSupport_StatusExists, 1)
+         , CSupport_ContactCount = ifelse(CSupport_TeamExists == "Yes", CSupport_ContactCount, 1)
+         
+         , PaperUse_LettersSendCount = ifelse(PaperUse_LettersSendExist == "Yes", PaperUse_LettersSendCount, 1)
+         , PaperUse_LettersReceiveCount = ifelse(PaperUse_LettersReceiveExist == "Yes", PaperUse_LettersReceiveCount, 1)
+         
+         , PaperUse_SignaturePercent = ifelse(PaperUse_SignatureExist == "Yes", PaperUse_SignaturePercent, 1)
+         
+         , Auto_NoHuman = ifelse(Auto_ManCheckExists == "Yes", Auto_NoHuman, 1)
+         , Auto_Judgement = ifelse(Auto_ManCheckExists == "Yes", Auto_Judgement, 1)
+         
+         , Additional_FundingAward = ifelse(Additional_TaxDisburse == "Yes", Additional_FundingAward, 1)
+  )
+
 ### Overall section completeness across all services
 
 overall_completeness <- as.data.frame(rbind(
   
   # Context 
-  "Context" = round((1.0 - section_nas(svc_sheets_cntxt %>% 
+  "Context" = round((section_nas(svc_sheets_cntxt %>% 
                 select(-ServiceID
                        , -SourceFile
                        , -FileLink)
   )) * 100.0, 1)
   
    # Objectives
-  , "Objectives" = round((1.0 - section_nas(svc_sheets_objctvs)) * 100.0, 1)
+  , "Objectives" = round((section_nas(svc_sheets_objctvs)) * 100.0, 1)
   
   # CDDO KPI fields
-  , "CDDO KPI Values" = round((1.0 - section_nas(svc_sheets_cddo %>% 
+  , "CDDO KPI Values" = round((section_nas(svc_sheets_cddo %>% 
                   select(-contains(c("AddInfo", "FreeText")))
                   )) * 100.0, 1)
   
   # CDDO Additional Info fields
-  , "CDDO KPI Additional Info" = round((1.0 - section_nas(svc_sheets_cddo %>% 
+  , "CDDO KPI Additional Info" = round((section_nas(svc_sheets_cddo %>% 
                                select(contains(c("AddInfo")))
                              )) * 100.0, 1)
   
   # CDDO Free Text
-  , "CDDO KPI Free Text" = round((1.0 - section_nas(svc_sheets_cddo %>% 
+  , "CDDO KPI Free Text" = round((section_nas(svc_sheets_cddo %>% 
                                select(-contains(c("FreeText")))
                              )) * 100.0, 1)
   
   # CDDO Pain Points
-  , "CDDO Pain Points" = round((1.0 - section_nas(svc_sheets_PP %>% 
+  , "CDDO Pain Points" = round((section_nas(svc_sheets_PP_QA %>% 
                                select(-contains(c("ImprovementsText"
                                                   , "ChallengesText")))
                              )) * 100.0, 1)
   
   # CDDO Improvements
-  , "CDDO Pain Points - Improvement Text" = round((1.0 - section_nas(svc_sheets_PP %>% 
+  , "CDDO Pain Points - Improvement Text" = round((section_nas(svc_sheets_PP_QA %>% 
                                select(contains(c("ImprovementsText")))
                              )) * 100.0, 1)
   
   # CDDO Challenges
-  , "CDDO Pain Points - Challenges Text" = round((1.0 - section_nas(svc_sheets_PP %>% 
+  , "CDDO Pain Points - Challenges Text" = round((section_nas(svc_sheets_PP_QA %>% 
                                select(contains(c("ChallengesText")))
                              )) * 100.0, 1)
   
   # Service Specific KPIs (first row only)
-  , "Service-specific KPIs" = round((1.0 - section_nas(svc_sheets_servspec %>% 
+  , "Service-specific KPIs" = round((section_nas(svc_sheets_servspec %>% 
                                select(contains(c("KPI1_Name")))
                              )) * 100.0, 1)
   
   # Service Specific Pain points (first row only)
-  , "Service-specific Pain Points" = round((1.0 - section_nas(svc_sheets_ssPP %>% 
+  , "Service-specific Pain Points" = round((section_nas(svc_sheets_ssPP %>% 
                                select(contains(c("Theme1_Name")))
   )) * 100.0, 1)
   
@@ -423,7 +454,40 @@ overall_completeness <- as.data.frame(rbind(
 
 
 ### Individual service section completion
-
+services_colnames <- c("Service", "Context", "Objectives"
+                       , "CDDO KPI Values", "CDDO KPI Add. Info", "CDDO KPI Free Text", 
+                       "CDDO PP Values", "CDDO PP Improv. Text", "CDDO PP Chall. Text",
+                       "Service-specific KPIs Flag", "Service-specific PP Flag"
+                       )
+service_completeness <- data.frame(
+  "Service" = svc_sheets_cntxt$Service
+  , "Contextual Information" = round(row_nas(svc_sheets_cntxt %>% 
+                                         select(-ServiceID, -SourceFile
+                                                , -FileLink, -Service)) * 100.0, 1)
+  , "Objectives" = round(row_nas(svc_sheets_objctvs) * 100.0, 1)
+  , "CDDO KPI Values" = round(row_nas(svc_sheets_cddo %>% 
+                                          select(-contains(c("AddInfo"
+                                                             , "FreeText")))) * 100.0, 1)
+  , "CDDO KPI Add. Info" = round(row_nas(svc_sheets_cddo %>% 
+                                          select(contains(c("AddInfo")))) * 100.0, 1)
+  , "CDDO KPI Free Text" = round(row_nas(svc_sheets_cddo %>% 
+                                             select(contains(c("FreeText")))) * 100.0, 1)
+  , "CDDO PP Values" = round(row_nas(svc_sheets_PP_QA %>% 
+                                          select(-contains(c("ImprovementsText"
+                                                             , "ChallengesText")))) * 100.0, 1)
+  , "CDDO PP Improvements" = round(row_nas(svc_sheets_PP_QA %>% 
+                                             select(contains(c("ImprovementsText")))) * 100.0, 1)
+  , "CDDO PP Challenges" = round(row_nas(svc_sheets_PP_QA %>% 
+                                               select(contains(c("ChallengesText")))) * 100.0, 1)
+  
+  , "Service-specific KPIs Flag" = ifelse(row_nas(svc_sheets_servspec %>% 
+                                             select(contains(c("KPI1_Name")))) == 1, "Provided", 
+                                          "Not Available")
+  , "Service-specific PP Flag" = ifelse(row_nas(svc_sheets_ssPP %>% 
+                                                    select(contains(c("Theme1_Name")))) == 1, "Provided", 
+                                          "Not Available")
+ )
+colnames(service_completeness) = services_colnames
 
 ### Field completion across all services by section
 
@@ -442,11 +506,11 @@ cddo_section_FreeText <- fieldsection_maker(svc_sheets_cddo
                                             , names = c("FreeText"), remove = FALSE)
 
 ## CDDO-specific Pain points
-cddoPP_section <- fieldsection_maker(svc_sheets_PP
+cddoPP_section <- fieldsection_maker(svc_sheets_PP_QA
                                      , names = c("ImprovementsText", "ChallengesText"))
-cddoPP_section_ImprovementsText <- fieldsection_maker(svc_sheets_PP
+cddoPP_section_ImprovementsText <- fieldsection_maker(svc_sheets_PP_QA
                                                       , names = c("ImprovementsText"), remove = FALSE)
-cddoPP_section_ChallengesText <- fieldsection_maker(svc_sheets_PP
+cddoPP_section_ChallengesText <- fieldsection_maker(svc_sheets_PP_QA
                                                     , names = c("ChallengesText"), remove = FALSE)
 
 ## Service Specific KPIs
@@ -501,6 +565,9 @@ save(sheets_list
      
      # Overall completeness 
      , overall_completeness
+     
+     # By service completion
+     , service_completeness
      
      # Field completion % by section tables
      , cntxt_section

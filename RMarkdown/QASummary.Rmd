@@ -32,12 +32,12 @@ template commission.
 The following services baseline data has been collated across `r nrow(sheets_list)` 
 input template files.
 
-# Section completeness
+# Section Completeness
 The table below shows how complete each section is across all baseline templates. 
 A RAG colour has been assigned with the following thresholds
 
-* Green: More than 75% of the fields in a section across all services are complete.
-* Yellow: Between 50% and 75% of the fields in a section across all services are complete.
+* White: More than 80% of the fields in a section across all services are complete.
+* Yellow: Between 50% and 80% of the fields in a section across all services are complete.
 * Red: Less than 50% of the fields in a section are complete.
 
 Please note, these are rough proportions given the varying size of the 
@@ -48,13 +48,17 @@ value fields to provide a more granular overview of key sections of interest.
 Where a section is left at the discretion of the service to fill in (i.e.
 service\-specific pain points), the proportion of services providing AT LEAST the
 first KPI name/Theme has been used but not the overall completion of all fields 
-in the relevant table (see 'Optional Section Completion').
+in the relevant table (see 'Field Completion - Optional Sections').
 
 ```{r overall, echo = FALSE, warning=FALSE}
 datatable(overall_completeness, style = 'bootstrap', options = list(   
             initComplete = JS("function(settings, json) {",  
                               "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") )
-          )
+          ) %>% 
+  formatStyle(1, 
+    backgroundColor = styleInterval(c(50, 80), c("#ce2029", "#FF08D", "white"))
+    , color = styleInterval(c(50, 80), c("white", "black", "black"))
+    )
 ```
 
 # Per Service Completion {.tabset}
@@ -66,22 +70,29 @@ Please note that the completion of service\-specific KPIs and
 service\-specific challenges can vary wildly across templates in their completion. These figures 
 should consequently be taken with a pinch of salt.
 
-## Context
-
-## Objectives
-
-## CDDO KPIs
-
-## CDDO pain points
-
-# Field Completion by section {.tabset}
+```{r service_completion, echo = FALSE, warning=FALSE}
+datatable(service_completeness, style = 'bootstrap', options = list(   
+            initComplete = JS("function(settings, json) {",  
+                              "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") ), 
+          rownames = FALSE
+          ) %>% 
+  formatStyle(c(2:9), 
+    backgroundColor = styleInterval(c(50, 80), c("#ce2029", "#FF08D", "white"))
+    , color = styleInterval(c(50, 80), c("white", "black", "black"))
+    )
+```
+# Field Completion By Section {.tabset}
 
 ## Context
 ```{r context_fields, echo = FALSE, warning=FALSE}
 datatable(cntxt_section, style = 'bootstrap', options = list(   
             initComplete = JS("function(settings, json) {",  
                               "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") )
-          )
+          )  %>% 
+  formatStyle(1, 
+    backgroundColor = styleInterval(c(50, 80), c("#ce2029", "#FF08D", "white"))
+    , color = styleInterval(c(50, 80), c("white", "black", "black"))
+    )
 ```
 
 ## Objectives
@@ -89,7 +100,11 @@ datatable(cntxt_section, style = 'bootstrap', options = list(
 datatable(objctvs_section, style = 'bootstrap', options = list(   
             initComplete = JS("function(settings, json) {",  
                               "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") )
-          )
+          )  %>% 
+  formatStyle(1, 
+    backgroundColor = styleInterval(c(50, 80), c("#ce2029", "#FF08D", "white"))
+    , color = styleInterval(c(50, 80), c("white", "black", "black"))
+    )
 ```
 
 ## CDDO KPIs
@@ -99,7 +114,11 @@ datatable(objctvs_section, style = 'bootstrap', options = list(
 datatable(cddo_section_KPIs, style = 'bootstrap', options = list(   
             initComplete = JS("function(settings, json) {",  
                               "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") )
-          )
+          )  %>% 
+  formatStyle(1, 
+    backgroundColor = styleInterval(c(50, 80), c("#ce2029", "#FF08D", "white"))
+    , color = styleInterval(c(50, 80), c("white", "black", "black"))
+    )
 ```
 
 ### Additional Information
@@ -107,7 +126,11 @@ datatable(cddo_section_KPIs, style = 'bootstrap', options = list(
 datatable(cddo_section_AddInfo, style = 'bootstrap', options = list(   
             initComplete = JS("function(settings, json) {",  
                               "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") )
-          )
+          )  %>% 
+  formatStyle(1, 
+    backgroundColor = styleInterval(c(50, 80), c("#ce2029", "#FF08D", "white"))
+    , color = styleInterval(c(50, 80), c("white", "black", "black"))
+    )
 ```
 
 ### Free text
@@ -115,7 +138,11 @@ datatable(cddo_section_AddInfo, style = 'bootstrap', options = list(
 datatable(cddo_section_FreeText, style = 'bootstrap', options = list(   
             initComplete = JS("function(settings, json) {",  
                               "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") )
-          )
+          )  %>% 
+  formatStyle(1, 
+    backgroundColor = styleInterval(c(50, 80), c("#ce2029", "#FF08D", "white"))
+    , color = styleInterval(c(50, 80), c("white", "black", "black"))
+    )
 ```
 
 ## CDDO pain points
@@ -125,7 +152,11 @@ datatable(cddo_section_FreeText, style = 'bootstrap', options = list(
 datatable(cddoPP_section, style = 'bootstrap', options = list(   
             initComplete = JS("function(settings, json) {",  
                               "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") )
-          )
+          ) %>% 
+  formatStyle(1, 
+    backgroundColor = styleInterval(c(50, 80), c("#ce2029", "#FF08D", "white"))
+    , color = styleInterval(c(50, 80), c("white", "black", "black"))
+    )
 ```
 
 ### Improvements
@@ -133,7 +164,11 @@ datatable(cddoPP_section, style = 'bootstrap', options = list(
 datatable(cddoPP_section_ImprovementsText, style = 'bootstrap', options = list(   
             initComplete = JS("function(settings, json) {",  
                               "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") )
-          )
+          ) %>% 
+  formatStyle(1, 
+    backgroundColor = styleInterval(c(50, 80), c("#ce2029", "#FF08D", "white"))
+    , color = styleInterval(c(50, 80), c("white", "black", "black"))
+    )
 ```
 
 ### Challenges 
@@ -141,17 +176,29 @@ datatable(cddoPP_section_ImprovementsText, style = 'bootstrap', options = list(
 datatable(cddoPP_section_ChallengesText, style = 'bootstrap', options = list(   
             initComplete = JS("function(settings, json) {",  
                               "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") )
-          )
+          ) %>% 
+  formatStyle(1, 
+    backgroundColor = styleInterval(c(50, 80), c("#ce2029", "#FF08D", "white"))
+    , color = styleInterval(c(50, 80), c("white", "black", "black"))
+    )
 ```
 
-# Optional Section completion {.tabset}
+# Field Completion - Optional Sections {.tabset}
+
+The completion of these fields will vary significantly across services. This table is 
+designed to show the proportion of all services that are providing data in these optional fields,
+separate from the fields we expect to be filled in. 
 
 ## Service-specific KPIs
 ```{r servspec_KPIs, echo = FALSE, warning=FALSE}
 datatable(servspec_section, style = 'bootstrap', options = list(   
             initComplete = JS("function(settings, json) {",  
                               "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") )
-          )
+          )  %>% 
+  formatStyle(c(1:5), 
+    backgroundColor = styleInterval(c(50, 80), c("#ce2029", "#FF08D", "white"))
+    , color = styleInterval(c(50, 80), c("white", "black", "black"))
+    )
 ```
 
 ## Service-specific pain points
@@ -159,5 +206,9 @@ datatable(servspec_section, style = 'bootstrap', options = list(
 datatable(servspecPP_section, style = 'bootstrap', options = list(   
             initComplete = JS("function(settings, json) {",  
                               "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",     "}") )
-          )
+          )  %>% 
+  formatStyle(c(1:3), 
+    backgroundColor = styleInterval(c(50, 80), c("#ce2029", "#FF08D", "white"))
+    , color = styleInterval(c(50, 80), c("white", "black", "black"))
+    )
 ```
