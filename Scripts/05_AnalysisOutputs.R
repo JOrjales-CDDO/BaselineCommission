@@ -16,7 +16,6 @@ DistributedBoxing <- function(df, xname = "GIVE ME AN X-TITLE", yname = "Number 
                               , x_limits = c(0,100)
                               , x_breaks = c(0, seq(0, 100, 10))
                               , y_breaks = c(0, seq(0, 100, 1))
-                              , labelpositions = c(2, 4, 6)
                               , outputname = "GIVE ME AN OUTPUT NAME") {
 
        # Create characteristics table

@@ -67,6 +67,12 @@ URL_collate <- "https://drive.google.com/drive/folders/1O56sQdBXEUNXZDc5OxksYEHA
 # DocsLocal <- "/Users/jose.orjales/Repos/Commission/Data/01_CommissionDocs/"
 
 #### Scripts------------------------------------------------------------
+
+### Collate baseline template data together
 #source("01_DataLoadDocs.R")
 source("Scripts/02_DataLoadSheets.R")
 source("Scripts/03_DataCollate.R")
+source("Scripts/04_Export.R")
+
+### Create QA HTML document (ensure Visual Studio Code runs pandoc, otherwise use RStudio)
+rmarkdown::render("RMarkdown/QASummary.Rmd")
