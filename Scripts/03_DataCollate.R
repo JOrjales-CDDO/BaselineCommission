@@ -76,7 +76,6 @@ fieldsection_maker <- function(df, names = NULL, remove = TRUE) {
   return(output)
 }
 
-
 #### Set some variable values-------------------------------------------
 AVGFTECost = 41500 # Provided by Ed Mack, EO FTE overhead.
 WkHrsYr = 1857.4 # 7.4 hours/day, 251 working days.
