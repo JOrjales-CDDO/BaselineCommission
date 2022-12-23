@@ -263,7 +263,7 @@ svc_sheets_ssPP <- data.frame(
     , `Theme9_CDDOSupport` = character()
 
     , `Theme10_Name` = character()
-    , `Theme10_Description` = character()
+
     , `Theme10_CDDOSupport` = character()
 
     , stringsAsFactors = FALSE

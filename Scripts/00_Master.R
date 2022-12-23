@@ -47,7 +47,7 @@ wc <- function(x = .Last.value) {
 
 ## Get authorised and tell googlesheets4 to use same authorisation token
 drive_auth(
-    email = "Jose.Orjales@digital.cabinet-office.gov.uk"
+    email = "[YOUR CO EMAIL ADDRESS HERE]"
 )
 gs4_auth(token = drive_token())
 

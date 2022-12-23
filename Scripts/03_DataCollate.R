@@ -417,7 +417,7 @@ overall_completeness <- as.data.frame(rbind(
   
   # CDDO Free Text
   , "CDDO KPI Free Text" = round((section_nas(svc_sheets_cddo %>% 
-                               select(-contains(c("FreeText")))
+                               select(contains(c("FreeText")))
                              )) * 100.0, 1)
   
   # CDDO Pain Points
