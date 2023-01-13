@@ -47,7 +47,7 @@ wc <- function(x = .Last.value) {
 
 ## Get authorised and tell googlesheets4 to use same authorisation token
 drive_auth(
-    email = "[YOUR CO EMAIL ADDRESS HERE]"
+    email = "jose.orjales@digital.cabinet-office.gov.uk"
 )
 gs4_auth(token = drive_token())
 
@@ -57,8 +57,10 @@ snapshot = "December 2022"
 # Set Working Directory (create a folder called Repos/BaselineCommission)
 setwd("~/Repos/BaselineCommission")
 
-# Google Drive storage folder for returns
-URL <- "https://drive.google.com/drive/folders/1wGGdygAufpQTBg8aeciDpWCNRODm2mbQ"
+# Google Drive storage folder for returns (only have one of these uncommented)
+URL <- "https://drive.google.com/drive/folders/1wGGdygAufpQTBg8aeciDpWCNRODm2mbQ" # Main Data Cleaning folder
+# URL <- "https://drive.google.com/drive/folders/12IrhP6myE6eNJBOXWm5zWYcDxVBWB4BQ" # Testing folder
+# URL <- "https://drive.google.com/drive/folders/19PpITsrKBs1xizQvHAwz5m_H1OOX8teJ" # Quarantine/Files showing errors
 
 # Google Drive storage folder for collated output
 URL_collate <- "https://drive.google.com/drive/folders/1O56sQdBXEUNXZDc5OxksYEHAXUBDGyex"

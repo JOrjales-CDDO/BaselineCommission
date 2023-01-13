@@ -101,6 +101,13 @@ svc_sheets_cddo <- svc_sheets_cddo %>%
             , gsub("£", "", NonStaffCost), NonStaffCost)
         )
 
+        # Started Digital Transactions - replace zero with NA to avoid 
+        # inf if completed digital != 0
+        , StartedDigitalTransactions = ifelse(StartedDigitalTransactions == 0 &
+            (CompletedDigitalTransactions != 0 | !is.na(CompletedDigitalTransactions))
+                , NA, StartedDigitalTransactions
+            )
+
         # Timeliness KPI conversions
         , UsersJourneyTimeFlag = ifelse(str_detect(UsersJourneyTimeHours, "d") == TRUE, "days"
             , ifelse(str_detect(UsersJourneyTimeHours, "h") == TRUE, "hours"
@@ -313,7 +320,19 @@ bespoke_CDDOKPI <- cbind(svc_sheets_cntxt %>%
 ### Opportunity Analysis
 bespoke_OppA <- cbind(svc_sheets_cntxt
     , svc_sheets_PP
-    , svc_sheets_cddo) %>%
+    , svc_sheets_cddo
+    # , svc_sheets_KPIcalcs %>% 
+    #     select(AutomatedTransactions
+    #            , FTECount
+    #            , NonStaffCost
+    #            , UsersEmail
+    #            , UsersPhone
+    #            , CDDOKPI_DigitalAdoption
+        # )
+    
+    
+    
+    ) %>%
 
     mutate(ChannelShift_TransactionsFlag = ifelse(
         !is.na(CompletedTransactions) == TRUE & 
@@ -349,6 +368,12 @@ bespoke_OppA <- cbind(svc_sheets_cntxt
         , CompletedTransactions
 
         , Legacy_PlusTenYear
+        , AutomatedTransactions
+        , FTECount
+        , NonStaffCost
+        , UsersEmail
+        , UsersPhone
+        # , CDDOKPI_DigitalAdoption
     )
 
 #### Create master final table with ALL fields present------------------
