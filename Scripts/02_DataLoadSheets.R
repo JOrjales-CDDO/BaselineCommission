@@ -273,8 +273,8 @@ svc_sheets_ssPP <- data.frame(
 for (i in 1:length(sheets_list$name)){
 
 # Rate limit the connections so we don't auto-fail.
-if (i%%8 == 0){
-      Sys.sleep(100)
+if (i%%6 == 0){
+      Sys.sleep(30)
 }
 
 ## Pull out service context table (if no data present in table AT ALL, 

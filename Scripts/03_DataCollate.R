@@ -6,7 +6,28 @@
 # in google sheets and do cleaning on them before they are linked 
 # together.
 
-#### Set up some custom functions for QA flagging-----------------------
+#### Set up some custom functions for QA -----------------------
+
+# Convert specific cell values like "unknown" and "N/A" to NAs
+replace_NA_unknown <- function(data) {
+  for (col in 1:ncol(data)) {
+    for (row in 1:nrow(data)) {
+      if (isTRUE(data[row, col] == "N/A" || 
+      data[row, col] == "n/a" || 
+      data[row, col] == "N/a" || 
+      data[row, col] == "NA" ||
+      data[row, col] == "Unknown" || 
+      data[row, col] == "Not known" || 
+      data[row, col] == " " || 
+      data[row, col] == "Data not available"
+    )) {
+        data[row, col] <- NA
+      }
+    }
+  }
+  return(data)
+}
+
 
 # Calculate the proportion of NAs across entire table
 section_nas <- function(df) {
@@ -88,7 +109,67 @@ WkHrsYr = 1857.4 # 7.4 hours/day, 251 working days.
 svc_sheets_cntxt <- svc_sheets_cntxt %>% 
     mutate(
         URLGovUKStart = str_replace(URLGovUKStart, "https://www.gov.uk", "")
+
+    # Clean up the department names subject to what we expect!
+    , DepartmentParent = ifelse(
+        str_detect(ServiceID, "CO") == TRUE
+        , "Cabinet Office"
+        , ifelse(
+            str_detect(ServiceID, "BEIS") == TRUE
+            , "Department for Business, Energy & Industrial Strategy"
+            , ifelse(
+                str_detect(ServiceID, "DCMS") == TRUE
+                , "Department for Digital, Culture, Media & Sport"
+                , ifelse(
+                    str_detect(ServiceID, "DFE") == TRUE
+                    , "Department for Education"
+                    , ifelse(
+                        str_detect(ServiceID, "DEFRA") == TRUE
+                        , "Department for Environment, Food & Rural Affairs"
+                        , ifelse(
+                            str_detect(ServiceID, "DIT") == TRUE
+                            , "Department for International Trade"
+                            , ifelse(
+                                str_detect(ServiceID, "DLUHC") == TRUE
+                                , "Department for Levelling Up, Housing & Communities"
+                                , ifelse(
+                                    str_detect(ServiceID, "DFT") == TRUE
+                                    , "Department for Transport"
+                                    , ifelse(
+                                        str_detect(ServiceID, "DWP") == TRUE
+                                        , "Department for Work & Pensions"
+                                        , ifelse(
+                                            str_detect(ServiceID, "DHSC") == TRUE
+                                            , "Department of Health & Social Care"
+                                            , ifelse(
+                                                str_detect(ServiceID, "FCDO") == TRUE
+                                                , "Foreign, Commonwealth & Development Office"
+                                                , ifelse(
+                                                    str_detect(ServiceID, "HMT") == TRUE
+                                                    , "HM Treasury"
+                                                    , ifelse(
+                                                        str_detect(ServiceID, "HMRC") == TRUE
+                                                        , "HM Revenue & Customs"
+                                                        , ifelse(
+                                                            str_detect(ServiceID, "HO") == TRUE
+                                                            , "Home Office"
+                                                            , ifelse(str_detect(ServiceID, "MOD") == TRUE
+                                                            , "Ministry of Defence"
+                                                            , ifelse(
+                                                                str_detect(ServiceID, "MOJ") == TRUE
+                                                                , "Ministry of Justice"
+                                                                , ifelse(
+                                                                    str_detect(ServiceID, "SLC") == TRUE
+                                                                    , "Student Loans Company"
+                                                                    , ifelse(
+                                                                        str_detect(ServiceID, "DVSA") == TRUE
+                                                                        , "Driver & Vehicle Standards Agency"
+                                                                        , "NEW DEPARTMENT OR ALB"
+                                                                    ))))))))))))))))))
     )
+
+
+
 
 ### Objectives table
 
@@ -202,6 +283,13 @@ svc_sheets_PP <- svc_sheets_PP %>%
     
   )
 
+#### Replace strings like "N/A", "Unknown", "blank", "not sure", "" with NA for all tables
+svc_sheets_cntxt <- replace_NA_unknown(svc_sheets_cntxt)
+svc_sheets_objctvs <- replace_NA_unknown(svc_sheets_objctvs)
+svc_sheets_cddo <- replace_NA_unknown(svc_sheets_cddo)
+svc_sheets_servspec <- replace_NA_unknown(svc_sheets_servspec)
+svc_sheets_PP <- replace_NA_unknown(svc_sheets_PP)
+svc_sheets_ssPP <- replace_NA_unknown(svc_sheets_ssPP)
 
 #### Create tables for Google sheet -------------------------------------
 
@@ -478,13 +566,14 @@ overall_completeness <- as.data.frame(rbind(
 
 
 ### Individual service section completion
-services_colnames <- c("Service", "Context", "Objectives"
+services_colnames <- c("ServiceID", "Service", "Context", "Objectives"
                        , "CDDO KPI Values", "CDDO KPI Add. Info", "CDDO KPI Free Text", 
                        "CDDO PP Values", "CDDO PP Improv. Text", "CDDO PP Chall. Text",
                        "Service-specific KPIs Flag", "Service-specific PP Flag"
                        )
 service_completeness <- data.frame(
-  "Service" = svc_sheets_cntxt$Service
+    "ServiceID" = svc_sheets_cntxt$ServiceID
+  , "Service" = svc_sheets_cntxt$Service
   , "Contextual Information" = round(row_nas(svc_sheets_cntxt %>% 
                                          select(-ServiceID, -SourceFile
                                                 , -FileLink, -Service)) * 100.0, 1)

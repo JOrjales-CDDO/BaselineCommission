@@ -47,6 +47,10 @@ template can be found [here](https://docs.google.com/spreadsheets/d/1cEdgBv2dQEU
 - All output table names from this section start with the prefix "sheets_" 
 but please review the code itself to understand which data frame container 
 relates to which table in the commission template.
+- The Google API has a rate limiter; consequently if running in Visual Studio 
+code (or your GUI of choice), you may get a Request failed 429 error and a 
+time (100.4 seconds) until next attempt. The code is still running however it 
+must be slowed down.
 
 ## 03_DataCollate.R
 
@@ -86,6 +90,9 @@ text added to data entry cells to aid service teams in completing the template
 (particularly prevalent in the pain points section). The timeliness KPI 
 also adjusts the entry from 5d, 5w for days and weeks respectively to be 
 set as hours for consistency across services.
+
+There is also a set of commands to replace any strings of unknown, N/A, 
+Not sure etc with NA to ensure consistency in how unknown values are handled.
 
 ### Bespoke tables
 
