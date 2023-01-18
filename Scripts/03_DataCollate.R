@@ -388,7 +388,7 @@ svc_sheets_KPIcalcs <- svc_sheets_cddo %>%
     # , CDDOKPI_DigitalCompletion
     # , CDDOKPI_UserSatisfaction
     , Complaints
-    # , UsersJourneyTimeHours
+    , UsersJourneyTimeHours
     # , CDDOKPI_TransactionCost
     # , CDDOKPI_StaffTime
     , AutomatedTransactions
