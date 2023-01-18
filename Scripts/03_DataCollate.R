@@ -384,15 +384,15 @@ svc_sheets_KPIcalcs <- svc_sheets_cddo %>%
     , UsersEmail
     , UsersPhone
     , UsersLetters
-    , CDDOKPI_DigitalAdoption
-    , CDDOKPI_DigitalCompletion
-    , CDDOKPI_UserSatisfaction
+    # , CDDOKPI_DigitalAdoption
+    # , CDDOKPI_DigitalCompletion
+    # , CDDOKPI_UserSatisfaction
     , Complaints
-    , UsersJourneyTimeHours
-    , CDDOKPI_TransactionCost
-    , CDDOKPI_StaffTime
+    # , UsersJourneyTimeHours
+    # , CDDOKPI_TransactionCost
+    # , CDDOKPI_StaffTime
     , AutomatedTransactions
-    , CDDOKPI_FailureDemand
+    # , CDDOKPI_FailureDemand
     )
 
 bespoke_CDDOKPI <- cbind(svc_sheets_cntxt %>%
@@ -472,15 +472,15 @@ svc_sheets_overall_final <- cbind(
     , svc_sheets_servspec
     , svc_sheets_PP
     , svc_sheets_ssPP
-    , bespoke_CDDOKPI %>% 
-    select(
-    CDDOKPI_DigitalAdoption
-    , CDDOKPI_DigitalCompletion
-    , CDDOKPI_UserSatisfaction
-    , CDDOKPI_TransactionCost
-    , CDDOKPI_StaffTime
-    , CDDOKPI_FailureDemand
-    )
+    # , bespoke_CDDOKPI %>% 
+    # select(
+    # CDDOKPI_DigitalAdoption
+    # , CDDOKPI_DigitalCompletion
+    # , CDDOKPI_UserSatisfaction
+    # , CDDOKPI_TransactionCost
+    # , CDDOKPI_StaffTime
+    # , CDDOKPI_FailureDemand
+    # )
 )
 
 #### Create placeholder views for QA document---------------------------

@@ -34,7 +34,7 @@ library(googlesheets4)
 library(googledrive)
 
 # Miscellaneous
-library(wordstonumbers) # Convert text numbers to numeric numbers e.g four to 4
+#library(wordstonumbers) # Convert text numbers to numeric numbers e.g four to 4
 
 ## Custom Functions
 # Write clip function, writes last table created to the clipboard ready to be

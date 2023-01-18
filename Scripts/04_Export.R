@@ -34,6 +34,7 @@ folder_id <- drive_find(n_max = 10
     , pattern = "All Services Datasets", shared_drive = foo)$id # Be careful of this,
 # if have more than one folder called "All Services Datasets", will find all of them.
 
+#### Remove any infinities
 
 #### Send tables to placeholder sheet(s)--------------------------------
 sheet_write(data = svc_sheets_overall_final
