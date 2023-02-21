@@ -105,6 +105,14 @@ WkHrsYr = 1857.4 # 7.4 hours/day, 251 working days.
 
 ### Cleaning------------------------------------------------------------
 
+## Replace strings like "N/A", "Unknown", "blank", "not sure", "" with NA for all tables
+svc_sheets_cntxt <- replace_NA_unknown(svc_sheets_cntxt)
+svc_sheets_objctvs <- replace_NA_unknown(svc_sheets_objctvs)
+svc_sheets_cddo <- replace_NA_unknown(svc_sheets_cddo)
+svc_sheets_servspec <- replace_NA_unknown(svc_sheets_servspec)
+svc_sheets_PP <- replace_NA_unknown(svc_sheets_PP)
+svc_sheets_ssPP <- replace_NA_unknown(svc_sheets_ssPP)
+
 ### Context Table
 svc_sheets_cntxt <- svc_sheets_cntxt %>% 
     mutate(
@@ -174,62 +182,61 @@ svc_sheets_cntxt <- svc_sheets_cntxt %>%
 ### Objectives table
 
 ### CDDO KPIs - most are just expected raw numbers
-svc_sheets_cddo <- svc_sheets_cddo %>% 
-    mutate(
-        
-        # Non Staff Costs
-        NonStaffCost = as.numeric(ifelse(str_detect(NonStaffCost, "£") == TRUE
-            , gsub("£", "", NonStaffCost), NonStaffCost)
-        )
-
-        # Started Digital Transactions - replace zero with NA to avoid 
-        # inf if completed digital != 0
-        , StartedDigitalTransactions = ifelse(StartedDigitalTransactions == 0 &
-            (CompletedDigitalTransactions != 0 | !is.na(CompletedDigitalTransactions))
-                , NA, StartedDigitalTransactions
-            )
-
-        # Timeliness KPI conversions
-        , UsersJourneyTimeFlag = ifelse(str_detect(UsersJourneyTimeHours, "d") == TRUE, "days"
-            , ifelse(str_detect(UsersJourneyTimeHours, "h") == TRUE, "hours"
-                , ifelse(str_detect(UsersJourneyTimeHours, "ms") == TRUE, "months"
-                    , ifelse(str_detect(UsersJourneyTimeHours, "w") == TRUE, "weeks"
-                        , ifelse(str_detect(UsersJourneyTimeHours, "m") == TRUE, "minutes"
-                            , "other"
-                        )))))
-        
-        , UsersJourneyTime2 = ifelse(UsersJourneyTimeFlag == "minutes"
-            , str_replace(UsersJourneyTimeHours, "m", "")
-            , ifelse(UsersJourneyTimeFlag == "hours"
-                , str_replace(UsersJourneyTimeHours, "h", "")
-                , ifelse(UsersJourneyTimeFlag == "days"
-                    , str_replace(UsersJourneyTimeHours, "d", "")
-                    , ifelse(UsersJourneyTimeFlag == "weeks"
-                        , str_replace(UsersJourneyTimeHours, "w", "")
-                        , ifelse(UsersJourneyTimeFlag == "months"
-                            , str_replace(UsersJourneyTimeHours, "ms", "")
-                            , NA
-                        )))))
-
-        , UsersJourneyTimeHours = ifelse(UsersJourneyTimeFlag == "minutes"
-            , round(as.numeric(UsersJourneyTime2) / 60.0, 2)
-            , ifelse(UsersJourneyTimeFlag == "days"
-                , round(as.numeric(UsersJourneyTime2) * 24.0, 2)
-                , ifelse(UsersJourneyTimeFlag == "hours"
-                    , round(as.numeric(UsersJourneyTime2), 2)
-                    , ifelse(UsersJourneyTimeFlag == "weeks"
-                        # Based on 365.25 days X 24 hours / 52 weeks = 168.6 hours
-                        , round(as.numeric(UsersJourneyTime2) * 168.6, 2)
-                        , ifelse(UsersJourneyTimeFlag == "months"
-                        # Based on 365.25 days X 24 hours / 12 months = 730.5 hours
-                            , round(as.numeric(UsersJourneyTime2) * 730.5, 2)
-                            , NA
-                    )))))
-    ) %>% 
-
-## Remove working columns as final step
-select(-UsersJourneyTimeFlag
-    , -UsersJourneyTime2)
+# svc_sheets_cddo <- svc_sheets_cddo %>% 
+#     mutate(
+#         
+#         # Non Staff Costs
+#         NonStaffCost = ifelse(str_detect(NonStaffCost, "£") == TRUE
+#             , gsub("£", "", NonStaffCost), NonStaffCost)
+# 
+#         # Started Digital Transactions - replace zero with NA to avoid 
+#         # inf if completed digital != 0
+#         , StartedDigitalTransactions = ifelse(StartedDigitalTransactions == 0 &
+#             (CompletedDigitalTransactions != 0 | !is.na(CompletedDigitalTransactions))
+#                 , NA, StartedDigitalTransactions
+#             )
+# 
+#         # Timeliness KPI conversions
+#         , UsersJourneyTimeFlag = ifelse(str_detect(UsersJourneyTimeHours, "d") == TRUE, "days"
+#             , ifelse(str_detect(UsersJourneyTimeHours, "h") == TRUE, "hours"
+#                 , ifelse(str_detect(UsersJourneyTimeHours, "ms") == TRUE, "months"
+#                     , ifelse(str_detect(UsersJourneyTimeHours, "w") == TRUE, "weeks"
+#                         , ifelse(str_detect(UsersJourneyTimeHours, "m") == TRUE, "minutes"
+#                             , "other"
+#                         )))))
+#         
+#         , UsersJourneyTime2 = ifelse(UsersJourneyTimeFlag == "minutes"
+#             , str_replace(UsersJourneyTimeHours, "m", "")
+#             , ifelse(UsersJourneyTimeFlag == "hours"
+#                 , str_replace(UsersJourneyTimeHours, "h", "")
+#                 , ifelse(UsersJourneyTimeFlag == "days"
+#                     , str_replace(UsersJourneyTimeHours, "d", "")
+#                     , ifelse(UsersJourneyTimeFlag == "weeks"
+#                         , str_replace(UsersJourneyTimeHours, "w", "")
+#                         , ifelse(UsersJourneyTimeFlag == "months"
+#                             , str_replace(UsersJourneyTimeHours, "ms", "")
+#                             , ""
+#                         )))))
+# 
+#         , UsersJourneyTimeHours = ifelse(UsersJourneyTimeFlag == "minutes"
+#             , round(as.numeric(UsersJourneyTime2) / 60.0, 2)
+#             , ifelse(UsersJourneyTimeFlag == "days"
+#                 , round(as.numeric(UsersJourneyTime2) * 24.0, 2)
+#                 , ifelse(UsersJourneyTimeFlag == "hours"
+#                     , round(as.numeric(UsersJourneyTime2), 2)
+#                     , ifelse(UsersJourneyTimeFlag == "weeks"
+#                         # Based on 365.25 days X 24 hours / 52 weeks = 168.6 hours
+#                         , round(as.numeric(UsersJourneyTime2) * 168.6, 2)
+#                         , ifelse(UsersJourneyTimeFlag == "months"
+#                         # Based on 365.25 days X 24 hours / 12 months = 730.5 hours
+#                             , round(as.numeric(UsersJourneyTime2) * 730.5, 2)
+#                             , str_replace(UsersJourneyTimeHours, UsersJourneyTimeHours, paste0(UsersJourneyTimeHours, ".OTHER"))
+#                     )))))
+#     ) %>% 
+# 
+# ## Remove working columns as final step
+# select(-UsersJourneyTimeFlag
+#     , -UsersJourneyTime2)
 
 ### Service - Specific KPI Summary
 svc_sheets_servspec <- svc_sheets_servspec %>% 
@@ -282,14 +289,6 @@ svc_sheets_PP <- svc_sheets_PP %>%
         , Usability_ComplexChallengesText = gsub("challenges does your service have which makes complex eligibility", NA, Usability_ComplexChallengesText)
     
   )
-
-#### Replace strings like "N/A", "Unknown", "blank", "not sure", "" with NA for all tables
-svc_sheets_cntxt <- replace_NA_unknown(svc_sheets_cntxt)
-svc_sheets_objctvs <- replace_NA_unknown(svc_sheets_objctvs)
-svc_sheets_cddo <- replace_NA_unknown(svc_sheets_cddo)
-svc_sheets_servspec <- replace_NA_unknown(svc_sheets_servspec)
-svc_sheets_PP <- replace_NA_unknown(svc_sheets_PP)
-svc_sheets_ssPP <- replace_NA_unknown(svc_sheets_ssPP)
 
 #### Create tables for Google sheet -------------------------------------
 
@@ -362,8 +361,8 @@ svc_sheets_KPIcalcs <- svc_sheets_cddo %>%
         , CDDOKPI_UserSatisfaction = round((as.numeric(UsersVerySatisfied) + 
             as.numeric(UsersSatisfied)) / as.numeric(UsersTotalSatisfactionRespondents) * 100.0, 1)
 
-        , CDDOKPI_TransactionCost = round((as.numeric(FTECount) * AVGFTECost + 
-            NonStaffCost) / as.numeric(CompletedTransactions), 2)
+        #, CDDOKPI_TransactionCost = round((as.numeric(FTECount) * AVGFTECost + 
+        #    NonStaffCost) / as.numeric(CompletedTransactions), 2)
 
         , CDDOKPI_StaffTime = round((as.numeric(FTECount) * WkHrsYr) / 
             as.numeric(CompletedTransactions), 1)

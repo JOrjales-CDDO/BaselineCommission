@@ -272,10 +272,6 @@ svc_sheets_ssPP <- data.frame(
 #### Begin extraction loop----------------------------------------------
 for (i in 1:length(sheets_list$name)){
 
-# Rate limit the connections so we don't auto-fail.
-if (i%%6 == 0){
-      Sys.sleep(30)
-}
 
 ## Pull out service context table (if no data present in table AT ALL, 
 # will say names must be same attribute as vector)

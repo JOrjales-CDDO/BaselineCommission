@@ -52,7 +52,7 @@ drive_auth(
 gs4_auth(token = drive_token())
 
 # Store text for naming conventions later
-snapshot = "December 2022"
+snapshot = "January 2023"
 
 # Set Working Directory (create a folder called Repos/BaselineCommission)
 setwd("~/Repos/BaselineCommission")
